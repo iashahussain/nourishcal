@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1a6b5c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="NourishCal">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>NourishCal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4f8;
+  --surface:#ffffff;
+  --surface2:#f8fafc;
+  --surface3:#eef2f7;
+  --border:#dde3ec;
+  --border-strong:#c4cdd9;
+  --accent:#1a6b5c;
+  --accent-light:#e8f5f1;
+  --accent2:#2d9b7e;
+  --text:#1a2332;
+  --muted:#5a6b7e;
+  --dim:#8b9bac;
+  --warn:#b45309;
+  --warn-bg:#fef3c7;
+  --warn-border:#fcd34d;
+  --danger:#dc2626;
+  --success:#166534;
+  --success-bg:#f0fdf4;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+  --r:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.05);
+  --shadow-md:0 4px 16px rgba(0,0,0,.1),0 1px 4px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:var(--sans);color:var(--text);min-height:100vh;padding:1.5rem 1rem 3rem}
+.app{max-width:700px;margin:0 auto}
+
+/* Header */
+header{margin-bottom:1.5rem;padding:1.5rem;background:var(--accent);border-radius:var(--r);box-shadow:var(--shadow-md)}
+.logo{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:.4rem;font-weight:500}
+h1{font-size:1.6rem;font-weight:700;color:#fff;line-height:1.2}
+h1 span{font-weight:300;opacity:.85}
+.sub{font-size:.8rem;color:rgba(255,255,255,.7);margin-top:.35rem}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.4rem;margin-bottom:.9rem;box-shadow:var(--shadow)}
+.ct{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.ct::after{content:'';flex:1;height:1.5px;background:var(--accent-light)}
+
+/* Inputs */
+label{font-size:.75rem;font-weight:600;color:var(--muted);letter-spacing:.02em;display:block;margin-bottom:.35rem;text-transform:uppercase}
+input[type=text],input[type=number],select{
+  font-family:var(--sans);font-size:.875rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:8px;padding:.6rem .85rem;
+  color:var(--text);outline:none;width:100%;transition:border-color .15s,box-shadow .15s;
+  -webkit-appearance:none
+}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,107,92,.12)}
+select option{background:#fff}
+
+/* Grid */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+@media(max-width:520px){.g2,.g3{grid-template-columns:1fr}}
+.field{margin-bottom:1rem}.field:last-child{margin-bottom:0}
+.hint{font-size:.7rem;color:var(--dim);margin-top:.3rem;line-height:1.4}
+
+/* Toggle buttons */
+.tog-group{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.tog{font-size:.75rem;font-weight:500;padding:.45rem .9rem;border-radius:7px;
+  border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);
+  cursor:pointer;transition:all .15s}
+.tog.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 6px rgba(26,107,92,.25)}
+.tog:hover:not(.active){border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+.sf{font-size:.75rem;font-weight:500;padding:.4rem .8rem;border-radius:7px;
+  border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .15s}
+.sf.active{background:var(--warn-bg);border-color:var(--warn-border);color:var(--warn)}
+.sf-group{display:flex;gap:.4rem;flex-wrap:wrap}
+
+/* PAL grid */
+.pal-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem}
+.pal-opt{border:1.5px solid var(--border);border-radius:8px;padding:.6rem .8rem;
+  cursor:pointer;transition:all .15s;background:var(--surface2)}
+.pal-opt:hover{border-color:var(--accent);background:var(--accent-light)}
+.pal-opt.active{border-color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 2px rgba(26,107,92,.15)}
+.pal-opt .pv{font-family:var(--mono);font-size:.95rem;color:var(--accent);font-weight:600}
+.pal-opt .pd{font-size:.68rem;color:var(--muted);margin-top:.1rem;line-height:1.3}
+
+/* Results */
+.section{display:none}.section.visible{display:block}
+.rg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-top:1rem}
+.rg2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1rem}
+@media(max-width:480px){.rg,.rg2{grid-template-columns:1fr 1fr}}
+.rc{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:.9rem 1rem;position:relative;overflow:hidden}
+.rc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);opacity:.3;border-radius:10px 10px 0 0}
+.rc.highlight::before{opacity:1}
+.rc.warn{border-color:var(--warn-border)}.rc.warn::before{background:var(--warn)}
+.rl{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
+.rv{font-size:1.3rem;font-weight:700;color:var(--accent);line-height:1.1}
+.rv.warn{color:var(--warn)}
+.ru{font-size:.65rem;color:var(--dim);margin-top:.2rem;font-weight:500}
+.rs{font-size:.62rem;color:var(--accent2);margin-top:.3rem;line-height:1.4;font-weight:500}
+
+/* Formula box */
+.fb{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;
+  padding:1rem;margin-top:1rem;font-size:.75rem;color:var(--muted);line-height:1.9}
+.fl{color:var(--accent);font-weight:600;font-family:var(--mono);font-size:.72rem}
+.fsrc{color:var(--dim);font-size:.65rem;margin-top:.5rem;border-top:1px solid var(--border);
+  padding-top:.4rem;font-style:italic}
+
+/* Warning */
+.wn{background:var(--warn-bg);border:1.5px solid var(--warn-border);border-radius:8px;
+  padding:.65rem .9rem;font-size:.75rem;color:var(--warn);margin-top:.75rem;line-height:1.5;font-weight:500}
+
+/* Tags */
+.src-tag{font-size:.65rem;background:var(--accent-light);border:1px solid var(--border);
+  border-radius:5px;padding:.15rem .5rem;color:var(--accent);font-weight:600;display:inline-block}
+
+/* Energy choice */
+.ecg{display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem}
+.ec{border:1.5px solid var(--border);border-radius:10px;padding:.85rem 1rem;cursor:pointer;
+  transition:all .15s;background:var(--surface2);display:flex;align-items:flex-start;gap:.85rem}
+.ec:hover{border-color:var(--accent);background:var(--accent-light)}
+.ec.sel{border-color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 2px rgba(26,107,92,.12)}
+.ec input{accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;margin-top:.15rem}
+.ec-body{flex:1}
+.ec-val{font-size:1.05rem;font-weight:700;color:var(--accent)}
+.ec-desc{font-size:.68rem;color:var(--muted);margin-top:.15rem;line-height:1.4}
+
+/* ABW */
+.abw-b{display:inline-flex;background:var(--warn-bg);border:1.5px solid var(--warn-border);
+  border-radius:8px;padding:.4rem .75rem;font-size:.72rem;color:var(--warn);
+  margin-top:.5rem;flex-wrap:wrap;line-height:1.6;font-weight:500}
+
+/* Output */
+.owrap{background:var(--surface2);border-radius:var(--r);border:1.5px solid var(--border);
+  padding:1.25rem;margin-top:1rem;position:relative}
+.olabel{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:.75rem}
+.otext{font-family:var(--mono);font-size:.76rem;line-height:1.85;color:var(--text);
+  white-space:pre;overflow-x:auto}
+.cbtn{position:absolute;top:1rem;right:1rem;font-size:.65rem;font-weight:600;letter-spacing:.05em;
+  text-transform:uppercase;background:var(--accent);color:#fff;border:none;
+  border-radius:6px;padding:.35rem .7rem;cursor:pointer;transition:opacity .15s}
+.cbtn:hover{opacity:.85}
+.cbtn.done{background:var(--success);color:#fff}
+
+/* Buttons */
+.btn{font-family:var(--sans);font-size:.85rem;font-weight:600;border:none;border-radius:8px;
+  padding:.65rem 1.3rem;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;transition:all .15s}
+.btn-p{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(26,107,92,.3)}
+.btn-p:hover{opacity:.88;box-shadow:0 4px 12px rgba(26,107,92,.35)}
+.btn-s{background:var(--surface2);color:var(--text);border:1.5px solid var(--border)}
+.btn-s:hover{border-color:var(--accent);color:var(--accent)}
+.brow{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem}
+hr.dv{border:none;border-top:1.5px solid var(--border);margin:1.25rem 0}
+
+/* Disclaimer */
+.disclaimer{background:var(--warn-bg);border:1.5px solid var(--warn-border);border-radius:var(--r);
+  padding:1rem 1.2rem;margin-top:1.5rem;font-size:.72rem;color:var(--warn);line-height:1.7}
+.disclaimer strong{display:block;margin-bottom:.3rem;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+
+/* Step indicator */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:1.25rem;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r);padding:.6rem 1rem;box-shadow:var(--shadow)}
+.step{display:flex;align-items:center;gap:.45rem;font-size:.7rem;font-weight:600;color:var(--dim);flex:1;min-width:0}
+.step.active{color:var(--accent)}
+.step.done{color:var(--accent2)}
+.step-num{width:20px;height:20px;border-radius:50%;border:2px solid currentColor;display:flex;
+  align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0}
+.step.active .step-num{background:var(--accent);border-color:var(--accent);color:#fff}
+.step.done .step-num{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.step-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step-arrow{color:var(--border-strong);font-size:.8rem;margin:0 .2rem;flex-shrink:0}
+
+/* Patient type grouped buttons */
+.type-group{margin-bottom:.75rem}
+.type-group-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:.4rem;padding-left:.1rem}
+.tog-group.paeds .tog.active{background:#0e7490;border-color:#0e7490}
+.tog-group.paeds .tog:hover:not(.active){border-color:#0e7490;color:#0e7490;background:#ecfeff}
+.tog-group.adult .tog.active{background:var(--accent);border-color:var(--accent)}
+
+/* Section card title — larger */
+.ct{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+  margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.ct::after{content:'';flex:1;height:1.5px;background:var(--accent-light)}
+
+/* Generate button — full width, prominent */
+.btn-generate{width:100%;justify-content:center;font-size:.95rem;padding:.85rem 1.5rem;
+  box-shadow:0 4px 16px rgba(26,107,92,.35);border-radius:10px;letter-spacing:.01em;transition:all .2s}
+.btn-generate:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,107,92,.4)}
+.btn-generate.ready{background:#16a34a;box-shadow:0 4px 20px rgba(22,163,74,.45);animation:pulse-green 2s infinite}
+@keyframes pulse-green{0%,100%{box-shadow:0 4px 20px rgba(22,163,74,.45)}50%{box-shadow:0 4px 28px rgba(22,163,74,.7)}}
+.brow-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:1rem;box-shadow:var(--shadow);margin-bottom:1.5rem}
+.brow-wrap .brow{margin-top:.65rem}
+.brow-hint{font-size:.68rem;color:var(--dim);text-align:center}
+
+/* Required field asterisk */
+.req{color:var(--danger);font-weight:700;margin-left:.15rem}
+
+/* Inline error states */
+input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;box-shadow:0 0 0 3px rgba(220,38,38,.08)}
+.field-error{font-size:.7rem;color:var(--danger);margin-top:.35rem;font-weight:500;display:flex;align-items:center;gap:.3rem;line-height:1.4}
+.field-error::before{content:'⚠';font-size:.85rem}
+.section-error{background:#fff5f5;border:1.5px solid var(--danger);border-radius:8px;padding:.55rem .8rem;font-size:.72rem;color:var(--danger);margin-top:.6rem;font-weight:500;display:flex;align-items:center;gap:.4rem;line-height:1.4}
+.section-error::before{content:'⚠';font-size:.9rem;flex-shrink:0}
+
+/* Footer version line */
+.version-line{font-size:.62rem;color:var(--dim);margin-top:.5rem;letter-spacing:.04em}
+
+/* Structured output cards */
+.out-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.75rem;flex-wrap:wrap}
+.out-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-bottom:1rem}
+@media(max-width:560px){.out-grid{grid-template-columns:1fr}}
+.out-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:.9rem 1rem;position:relative;overflow:hidden}
+.out-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);border-radius:10px 10px 0 0}
+.out-card .ol{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem}
+.out-card .ov{font-size:1.05rem;font-weight:700;color:var(--text);line-height:1.25;word-break:break-word}
+.out-card .od{font-size:.7rem;color:var(--muted);margin-top:.35rem;line-height:1.5}
+.out-warn{background:var(--warn-bg);border:1.5px solid var(--warn-border);border-radius:8px;padding:.6rem .85rem;font-size:.72rem;color:var(--warn);margin-bottom:.85rem;line-height:1.5;font-weight:500;display:flex;align-items:flex-start;gap:.4rem}
+.out-warn::before{content:'⚠';flex-shrink:0;font-size:.85rem;line-height:1.5}
+.out-source{font-size:.65rem;color:var(--dim);font-style:italic;border-top:1px solid var(--border);padding-top:.7rem;margin-top:.25rem;line-height:1.6}
+.out-text-toggle{margin-top:1rem;font-size:.7rem}
+.out-text-toggle summary{cursor:pointer;color:var(--muted);font-weight:600;padding:.4rem 0;list-style:none;display:inline-flex;align-items:center;gap:.3rem}
+.out-text-toggle summary::before{content:'▸';transition:transform .15s;display:inline-block}
+.out-text-toggle[open] summary::before{transform:rotate(90deg)}
+
+/* Mobile compact step indicator */
+@media(max-width:520px){
+  .steps{padding:.5rem .75rem}
+  .step-arrow{display:none}
+  .step:not(.active){display:none}
+  .step.active{flex:1;font-size:.75rem}
+}
+
+/* Clinical condition picker — prominent decision panel */
+.cond-picker{background:var(--accent-light);border:1.5px solid var(--accent);border-radius:10px;padding:.95rem 1rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(26,107,92,.08)}
+.cond-picker label{color:var(--accent);font-size:.7rem;font-weight:700;letter-spacing:.08em;margin-bottom:.45rem}
+.cond-select-wrap{position:relative}
+.cond-select{font-family:var(--sans);font-size:.92rem;font-weight:500;background:#fff;border:1.5px solid var(--accent);border-radius:8px;padding:.72rem 2.4rem .72rem .95rem;color:var(--text);outline:none;width:100%;cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none;transition:border-color .15s,box-shadow .15s}
+.cond-select:focus{box-shadow:0 0 0 3px rgba(26,107,92,.18)}
+.cond-select.has-error{border-color:var(--danger);background:#fff5f5}
+.cond-select-wrap::after{content:'';position:absolute;right:1rem;top:50%;width:10px;height:10px;border-right:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:translateY(-75%) rotate(45deg);pointer-events:none}
+.cond-summary{display:flex;align-items:center;gap:.5rem;margin-top:.55rem;font-size:.7rem;color:var(--accent);font-weight:500;min-height:1.1rem;flex-wrap:wrap}
+.cond-summary .cat-badge{display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--accent);color:#fff;padding:.18rem .5rem;border-radius:4px}
+.cond-summary .cat-badge.cat-mod{background:#c2761c}
+.cond-summary .cat-badge.cat-hyper{background:#b04030}
+.cond-summary .cat-badge.cat-special{background:#5a4fa3}
+.cond-summary .cond-range{color:var(--muted);font-weight:500}
+
+/* Method chooser cards */
+.method-intro{font-size:.78rem;color:var(--muted);margin:1rem 0 .65rem 0;font-weight:500;line-height:1.5}
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem}
+@media(max-width:520px){.method-grid{grid-template-columns:1fr}}
+.method-card{position:relative;border:2px solid var(--border);border-radius:10px;padding:1rem 1.1rem;background:var(--surface2);cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:.35rem}
+.method-card:hover{border-color:var(--accent);background:var(--accent-light)}
+.method-card.sel{border-color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 3px rgba(26,107,92,.15)}
+.method-card.disabled{opacity:.55;cursor:not-allowed;border-style:dashed}
+.method-card .mc-head{display:flex;justify-content:space-between;align-items:center;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.method-card.sel .mc-head{color:var(--accent)}
+.method-card .mc-radio{width:14px;height:14px;border-radius:50%;border:2px solid var(--border-strong);flex-shrink:0;position:relative}
+.method-card.sel .mc-radio{border-color:var(--accent);background:var(--accent)}
+.method-card.sel .mc-radio::after{content:'';position:absolute;inset:2px;border-radius:50%;background:#fff}
+.method-card .mc-val{font-size:1.1rem;font-weight:700;color:var(--text);line-height:1.2}
+.method-card.sel .mc-val{color:var(--accent)}
+.method-card .mc-detail{font-size:.68rem;color:var(--muted);line-height:1.45}
+.method-card .mc-tag{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-light);padding:.15rem .45rem;border-radius:4px;display:inline-block;align-self:flex-start;margin-top:.15rem}
+.method-card.disabled .mc-tag{background:var(--surface3);color:var(--dim)}
+
+/* Patient type tinted panels */
+.ptype-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:.5rem;display:block}
+.ptype-panel{border-radius:10px;padding:.75rem .85rem;margin-bottom:.6rem;border:1.5px solid}
+.ptype-panel.paeds{background:#ecfeff;border-color:#bce6ec}
+.ptype-panel.adult{background:#f6faf8;border-color:var(--border)}
+.ptype-head{display:flex;align-items:center;gap:.45rem;margin-bottom:.6rem}
+.ptype-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ptype-panel.paeds .ptype-dot{background:#0e7490}
+.ptype-panel.adult .ptype-dot{background:var(--accent)}
+.ptype-title{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.ptype-panel.paeds .ptype-title{color:#0e7490}
+.ptype-panel.adult .ptype-title{color:var(--accent)}
+.ptype-sub{font-size:.68rem;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0;margin-left:.15rem}
+.ptype-panel .tog{font-size:.78rem;padding:.5rem 1rem;background:#fff}
+.ptype-panel .tog.active::before{content:'✓';font-weight:700;margin-right:.3rem;font-size:.85rem}
+.ptype-panel.paeds .tog:hover:not(.active){border-color:#0e7490;color:#0e7490;background:#ecfeff}
+.ptype-panel.paeds .tog.active{background:#0e7490;border-color:#0e7490;color:#fff}
+.ptype-panel.adult .tog:hover:not(.active){border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.ptype-panel.adult .tog.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* Recommended Daily Serves card */
+.serves-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:0;margin-top:1rem;overflow:hidden}
+.serves-card-head{padding:.85rem 1.05rem .65rem 1.05rem;border-bottom:1px solid var(--border);background:var(--surface2)}
+.serves-card-title{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.15rem}
+.serves-card-sub{font-size:.7rem;color:var(--muted);font-weight:500}
+.serves-row{display:flex;align-items:center;gap:.75rem;padding:.7rem 1.05rem;border-bottom:1px solid var(--border)}
+.serves-row:last-of-type{border-bottom:none}
+.serves-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.serves-dot.veg{background:#3fa84a}.serves-dot.fruit{background:#e0941a}.serves-dot.starch{background:#c97a3a}
+.serves-dot.prot{background:#b04030}.serves-dot.dairy{background:#3b78c2}.serves-dot.fat{background:#9e9e2a}
+.serves-dot.extra{background:#7a7a7a}
+.serves-name{font-size:.78rem;font-weight:600;color:var(--text);min-width:7.5rem;flex-shrink:0}
+.serves-val{font-size:.92rem;font-weight:700;color:var(--accent);min-width:5rem;flex-shrink:0;line-height:1.2}
+.serves-val .serves-val-sub{display:block;font-size:.62rem;color:var(--muted);font-weight:500;margin-top:.1rem;letter-spacing:.04em;text-transform:uppercase}
+.serves-ex{font-size:.7rem;color:var(--muted);line-height:1.45;flex:1}
+.serves-ex em{font-style:normal;display:block;color:var(--dim);font-size:.66rem;margin-top:.15rem}
+@media(max-width:520px){.serves-row{flex-wrap:wrap}.serves-name{min-width:0;width:calc(100% - 18px)}.serves-val{margin-left:18px}.serves-ex{flex:1 0 100%;margin-left:18px}}
+.serves-footer{padding:.85rem 1.05rem;background:var(--surface2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.serves-footer-left{flex:1;min-width:10rem}
+.serves-footer-line{font-size:.7rem;color:var(--muted);line-height:1.6}
+.serves-footer-line strong{color:var(--text);font-weight:600}
+.serves-status{display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;font-weight:600;padding:.35rem .7rem;border-radius:6px}
+.serves-status.ok{background:#ecfdf5;color:#0d6b3e;border:1.5px solid #a7e8c4}
+.serves-status.over{background:#fef3c7;color:#92560b;border:1.5px solid #fcd34d}
+.serves-status.under{background:#fee2e2;color:#9b1c1c;border:1.5px solid #fca5a5}
+.serves-status .ss-dot{width:7px;height:7px;border-radius:50%}
+.serves-status.ok .ss-dot{background:#16a34a}.serves-status.over .ss-dot{background:#d97706}.serves-status.under .ss-dot{background:#dc2626}
+.serves-detail-toggle{margin-top:.5rem;font-size:.66rem}
+.serves-detail-toggle summary{cursor:pointer;color:var(--dim);font-weight:600;list-style:none;padding:.3rem 0}
+.serves-detail-toggle summary::before{content:'▸';font-size:.7rem;margin-right:.25rem}
+.serves-detail-toggle[open] summary::before{content:'▾'}
+.serves-detail-body{font-size:.66rem;color:var(--muted);line-height:1.7;padding:.45rem 0;font-style:italic}
+.serves-bf-note{padding:.7rem 1.05rem;background:#fffbeb;border-top:1px solid var(--warn-border);font-size:.7rem;color:var(--warn);font-weight:500;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo">Clinical Nutrition Requirements</div>
+  <h1><span>Nourish</span>Cal</h1>
+  <p class="sub">Calculate requirements · Add results to clinical notes</p>
+  <div style="margin-top:.75rem;display:flex;align-items:center;gap:.5rem">
+    <span style="font-size:.7rem;color:rgba(255,255,255,.7);font-weight:500">Energy unit:</span>
+    <div role="group" aria-label="Energy display unit" style="display:flex;background:rgba(255,255,255,.15);border-radius:7px;padding:2px;gap:2px">
+      <button id="unit-kcal" onclick="setEnergyUnit('kcal')" aria-label="Kilocalories" aria-pressed="true" style="font-size:.7rem;font-weight:600;padding:.25rem .7rem;border-radius:5px;border:none;cursor:pointer;background:#fff;color:var(--accent);transition:all .15s">kcal</button>
+      <button id="unit-kj" onclick="setEnergyUnit('kj')" aria-label="Kilojoules" aria-pressed="false" style="font-size:.7rem;font-weight:600;padding:.25rem .7rem;border-radius:5px;border:none;cursor:pointer;background:transparent;color:rgba(255,255,255,.8);transition:all .15s">kJ</button>
+    </div>
+  </div>
+</header>
+
+<!-- Step indicator -->
+<div class="steps" id="step-bar">
+  <div class="step active" id="step1"><div class="step-num">1</div><div class="step-label">Patient</div></div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="step2"><div class="step-num">2</div><div class="step-label">Requirements</div></div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="step3"><div class="step-num">3</div><div class="step-label">Fluid</div></div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="step4"><div class="step-num">4</div><div class="step-label">Generate</div></div>
+</div>
+
+<div class="card">
+  <div class="ct">Patient Details</div>
+
+  <div class="field" style="margin-bottom:1rem">
+    <span class="ptype-label">Patient Type</span>
+    <div class="ptype-panel paeds">
+      <div class="ptype-head"><span class="ptype-dot" aria-hidden="true"></span><span class="ptype-title">Paediatric <span class="ptype-sub">· birth to 18 years</span></span></div>
+      <div class="tog-group" id="type-tog-paeds" style="margin-bottom:0;flex-wrap:wrap">
+        <button class="tog" onclick="setType('preterm')">Preterm / NICU</button>
+        <button class="tog active" onclick="setType('infant')">Infant / Child 0–3y</button>
+        <button class="tog" onclick="setType('child')">Child &gt;3y</button>
+        <button class="tog" onclick="setType('picu')">Paediatric ICU</button>
+      </div>
+    </div>
+    <div class="ptype-panel adult">
+      <div class="ptype-head"><span class="ptype-dot" aria-hidden="true"></span><span class="ptype-title">Adult <span class="ptype-sub">· 18+ years</span></span></div>
+      <div class="tog-group" id="type-tog-adult" style="margin-bottom:0;flex-wrap:wrap">
+        <button class="tog" onclick="setType('adult-out')">Outpatient</button>
+        <button class="tog" onclick="setType('adult-hosp')">Hospitalised</button>
+        <button class="tog" onclick="setType('adult-icu')">ICU</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="field" style="margin-bottom:0">
+      <label for="weight">Weight (kg)<span class="req" aria-hidden="true">*</span></label>
+      <input type="number" id="weight" placeholder="e.g. 5.02" step="0.01" min="0" aria-required="true" oninput="clearFieldError('weight');recalc();updateSteps()">
+    </div>
+    <div class="field" style="margin-bottom:0" id="height-field">
+      <label for="height">Height (cm) <span style="font-size:.65rem;color:var(--dim)">adults only</span></label>
+      <input type="number" id="height" placeholder="e.g. 165" step="0.5" oninput="recalc()">
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label for="sex">Sex<span class="req" aria-hidden="true">*</span></label>
+      <select id="sex" aria-required="true" onchange="clearFieldError('sex');recalc();updateSteps()">
+        <option value="">— select —</option>
+        <option value="M">Male</option>
+        <option value="F">Female</option>
+      </select>
+    </div>
+  </div>
+  <div class="hint" style="margin-top:.6rem">💡 Weight and sex are entered here once · Age is entered inside each section below</div>
+
+  <div id="abw-section" style="display:none">
+    <div class="g2" style="margin-top:.75rem;margin-bottom:.75rem">
+      <div class="field" style="margin-bottom:0">
+        <label>Age group</label>
+        <div class="tog-group" id="age-grp-tog" style="margin-bottom:0">
+          <button class="tog active" onclick="setAdultAgeGrp('under65')">&lt; 65 years</button>
+          <button class="tog" onclick="setAdultAgeGrp('over65')">&gt; 65 years</button>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Weight to use in calculations</label>
+        <select id="wt-choice" onchange="recalc()">
+          <option value="actual">Actual weight</option>
+          <option value="ibw25">IBW (BMI 25)</option>
+          <option value="abw">Adjusted body weight (ABW)</option>
+        </select>
+      </div>
+    </div>
+    <div id="abw-result"></div>
+    <div id="nemo-wt-rec"></div>
+  </div>
+</div>
+
+<div class="card section" id="sec-preterm">
+  <div class="ct">Preterm / NICU — Energy &amp; Protein</div>
+  <div class="g2" style="margin-bottom:1rem">
+    <div><label>Gestational Age (weeks)</label><input type="number" id="ga-weeks" placeholder="e.g. 28" min="22" max="42" oninput="recalc()"></div>
+    <div><label>Feed Route</label><div class="tog-group" style="margin-top:.35rem;margin-bottom:0" id="route-tog"><button class="tog active" onclick="setRoute('enteral')">Enteral</button><button class="tog" onclick="setRoute('parenteral')">Parenteral</button></div></div>
+  </div>
+  <div id="preterm-result"></div>
+  <div id="preterm-e-choice-section" style="display:none"><hr class="dv"><label>Choose <strong>energy</strong> source for notes output:</label><div class="ecg" id="preterm-e-choice"></div></div>
+  <div id="preterm-p-choice-section" style="display:none"><hr class="dv"><label>Choose <strong>protein</strong> source for notes output:</label><div class="ecg" id="preterm-p-choice"></div></div>
+  <div class="hint" style="margin-top:.5rem" id="preterm-hint">💡 Enter weight and gestational age to see calculated ranges — then choose your preferred source for the notes output</div>
+
+  <!-- Neonatal terminology reference -->
+  <div style="margin-top:1rem">
+    <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('▸')?'▾ Hide neonatal terminology':'▸ Show neonatal terminology'" style="font-size:.7rem;font-weight:600;color:var(--accent);background:var(--accent-light);border:1.5px solid var(--border);border-radius:6px;padding:.35rem .75rem;cursor:pointer;width:100%;text-align:left">▸ Show neonatal terminology</button>
+    <div style="display:none;margin-top:.75rem">
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:.6rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.45rem .6rem;text-align:left;border-radius:6px 0 0 0">Term</th>
+            <th style="padding:.45rem .6rem;text-align:left;border-radius:0 6px 0 0">Definition</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--accent-light)"><td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">Term</td><td style="padding:.4rem .6rem;border-bottom:1px solid var(--border);color:var(--text)">37–41 weeks</td></tr>
+          <tr style="background:var(--surface2)"><td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">Preterm</td><td style="padding:.4rem .6rem;border-bottom:1px solid var(--border);color:var(--text)">&lt;37 weeks</td></tr>
+          <tr style="background:var(--accent-light)"><td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">Extremely preterm</td><td style="padding:.4rem .6rem;border-bottom:1px solid var(--border);color:var(--text)">&lt;28 weeks</td></tr>
+          <tr style="background:var(--surface2)"><td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">Extremely low birthweight (ELBW)</td><td style="padding:.4rem .6rem;border-bottom:1px solid var(--border);color:var(--text)">&lt;1000 g</td></tr>
+          <tr style="background:var(--accent-light)"><td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">Very low birthweight (VLBW)</td><td style="padding:.4rem .6rem;border-bottom:1px solid var(--border);color:var(--text)">&lt;1500 g</td></tr>
+          <tr style="background:var(--surface2)"><td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">Low birthweight (LBW)</td><td style="padding:.4rem .6rem;border-bottom:1px solid var(--border);color:var(--text)">&lt;2500 g</td></tr>
+          <tr style="background:var(--accent-light)"><td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">Small for gestational age (SGA)</td><td style="padding:.4rem .6rem;border-bottom:1px solid var(--border);color:var(--text)">Weight &lt;10th %ile for gestational age</td></tr>
+          <tr style="background:var(--surface2)"><td style="padding:.4rem .6rem;font-weight:600;color:var(--accent)">Large for gestational age (LGA)</td><td style="padding:.4rem .6rem;color:var(--text)">Weight &gt;90th %ile for gestational age</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:.67rem;color:var(--dim);padding:.35rem .5rem;border-left:2px solid var(--accent-light);line-height:1.6;font-style:italic">Live classification badge above applies Term / Preterm / Extremely Preterm and LBW / VLBW / ELBW once GA and weight are entered. SGA / LGA require birth-weight centile lookup — not auto-classified.</div>
+    </div>
+  </div>
+
+  <!-- Preterm reference table -->
+  <div style="margin-top:1rem">
+    <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('▸')?'▾ Hide reference table':'▸ Show reference table'" style="font-size:.7rem;font-weight:600;color:var(--accent);background:var(--accent-light);border:1.5px solid var(--border);border-radius:6px;padding:.35rem .75rem;cursor:pointer;width:100%;text-align:left">▸ Show reference table</button>
+    <div style="display:none;margin-top:.75rem">
+
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem">Preterm Nutrition Requirements by Weight</div>
+      <div style="font-size:.67rem;color:var(--dim);margin-bottom:.6rem;font-style:italic">Broad range — use as a starting point. Start at the lower end and build. <span class="ref-e" data-lo="140" data-hi="140">140 kcal</span> and <span class="ref-e" data-lo="160" data-hi="160">160 kcal</span> is also safe.</div>
+
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:.6rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.45rem .6rem;text-align:left;border-radius:6px 0 0 0">Weight</th>
+            <th style="padding:.45rem .6rem;text-align:center">Reference</th>
+            <th class="ref-e-hdr" style="padding:.45rem .6rem;text-align:center">Energy (kcal/kg/day)</th>
+            <th style="padding:.45rem .6rem;text-align:center;border-radius:0 6px 0 0">Protein (g/kg/day)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.45rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">&lt;1800g</td>
+            <td style="padding:.45rem .6rem;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">ESPGHAN 2022</td>
+            <td class="ref-e" data-lo="115" data-hi="140" data-note="up to 160" style="padding:.45rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">115–140 <span style="font-weight:400;color:var(--dim)">(up to 160)</span></td>
+            <td style="padding:.45rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">3.5–4.0 <span style="font-weight:400;color:var(--dim)">(max 4.5)</span></td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.45rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">&gt;1800–2500g</td>
+            <td style="padding:.45rem .6rem;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">Koletzko 2021</td>
+            <td class="ref-e" data-lo="110" data-hi="130" style="padding:.45rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">110–130</td>
+            <td style="padding:.45rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">3.0–4.0</td>
+          </tr>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.45rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">2000–2500g</td>
+            <td style="padding:.45rem .6rem;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">Koletzko 2021</td>
+            <td class="ref-e" data-lo="110" data-hi="130" style="padding:.45rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">110–130</td>
+            <td style="padding:.45rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">2.5–3.5 <span style="font-weight:400;color:var(--dim)">(slightly less protein)</span></td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.45rem .6rem;font-weight:600;color:var(--accent)">Term / &gt;2500g</td>
+            <td style="padding:.45rem .6rem;text-align:center;color:var(--muted)">NRV</td>
+            <td class="ref-e" data-lo="105" data-hi="120" style="padding:.45rem .6rem;text-align:center;font-weight:600;color:var(--text)">105–120</td>
+            <td style="padding:.45rem .6rem;text-align:center;font-weight:600;color:var(--text)">2.0–2.5</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size:.67rem;color:var(--dim);padding:.35rem .5rem;border-left:2px solid var(--accent-light);line-height:1.6;margin-bottom:1rem">
+        ESPGHAN 2022 · Koletzko 2021 · Australian NRV
+      </div>
+
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem">ASPEN 2018 — Recommended Parenteral &amp; Enteral Intakes</div>
+
+      <div style="font-size:.65rem;font-weight:600;color:var(--accent);margin-bottom:.35rem">Parenteral</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:.75rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.4rem .5rem;text-align:left;border-radius:6px 0 0 0">Age</th>
+            <th style="padding:.4rem .5rem;text-align:center">Week</th>
+            <th class="ref-e-hdr" style="padding:.4rem .5rem;text-align:center">Energy (kcal/kg)</th>
+            <th style="padding:.4rem .5rem;text-align:center;border-radius:0 6px 0 0">Protein (g/kg)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .5rem;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border)">Preterm</td>
+            <td style="padding:.4rem .5rem;text-align:center;color:var(--muted);border-bottom:1px solid var(--border)">&lt;34-0/7</td>
+            <td class="ref-e" data-lo="85" data-hi="111" style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)">85–111</td>
+            <td style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)">3–4</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .5rem;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border)">Late Preterm</td>
+            <td style="padding:.4rem .5rem;text-align:center;color:var(--muted);border-bottom:1px solid var(--border)">34-0/7 to 36-6/7</td>
+            <td class="ref-e" data-lo="100" data-hi="110" style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)">100–110</td>
+            <td style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)">3–3.5</td>
+          </tr>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .5rem;font-weight:700;color:var(--accent)">Term</td>
+            <td style="padding:.4rem .5rem;text-align:center;color:var(--muted)">≥37-0/7</td>
+            <td class="ref-e" data-lo="90" data-hi="108" style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text)">90–108</td>
+            <td style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text)">2.5–3</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size:.65rem;font-weight:600;color:var(--accent);margin-bottom:.35rem">Enteral</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:.6rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.4rem .5rem;text-align:left;border-radius:6px 0 0 0">Age</th>
+            <th style="padding:.4rem .5rem;text-align:center">Week</th>
+            <th class="ref-e-hdr" style="padding:.4rem .5rem;text-align:center">Energy (kcal/kg)</th>
+            <th style="padding:.4rem .5rem;text-align:center;border-radius:0 6px 0 0">Protein (g/kg)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .5rem;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border)">Preterm</td>
+            <td style="padding:.4rem .5rem;text-align:center;color:var(--muted);border-bottom:1px solid var(--border)">&lt;34-0/7</td>
+            <td class="ref-e" data-lo="110" data-hi="130" style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)">110–130</td>
+            <td style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)">3.5–4.5</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .5rem;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border)">Late Preterm</td>
+            <td style="padding:.4rem .5rem;text-align:center;color:var(--muted);border-bottom:1px solid var(--border)">34-0/7 to 36-6/7</td>
+            <td class="ref-e" data-lo="120" data-hi="135" style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)">120–135</td>
+            <td style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)">3–3.2</td>
+          </tr>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .5rem;font-weight:700;color:var(--accent)">Term</td>
+            <td style="padding:.4rem .5rem;text-align:center;color:var(--muted)">≥37-0/7</td>
+            <td class="ref-e" data-lo="105" data-hi="120" style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text)">105–120</td>
+            <td style="padding:.4rem .5rem;text-align:center;font-weight:600;color:var(--text)">2–2.5</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:.67rem;color:var(--dim);padding:.35rem .5rem;border-left:2px solid var(--accent-light);line-height:1.6">
+        ASPEN 2018
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="card section visible" id="sec-infant">
+  <div class="ct">Infant / Child 0–3y</div>
+  <div class="g2" style="margin-bottom:1rem">
+    <div>
+      <label>Age <span style="font-size:.65rem;color:var(--dim)">(enter in months, 0–35)</span></label>
+      <input type="number" id="inf-months" placeholder="e.g. 0–35 months" min="0" max="35" oninput="updateInfantStatus();recalc()">
+      <div class="hint" id="inf-age-hint" style="margin-top:.3rem"></div>
+      <div class="hint" style="margin-top:.2rem">💡 Use <strong>corrected age</strong> for preterm babies until <strong>2 years</strong> corrected age</div>
+    </div>
+    <div>
+      <label>Clinical Status</label>
+      <select id="inf-status" onchange="updateInfantSF();recalc()">
+        <option value="healthy">Healthy / Outpatient</option>
+        <option value="ill">Hospitalised / Increased requirements / Catch-up growth</option>
+      </select>
+      <div class="hint" style="margin-top:.3rem">Switches protein equation and unlocks stress factor</div>
+    </div>
+  </div>
+  <div class="field" id="inf-sf-field" style="display:none">
+    <label>Stress Factor <span style="font-size:.65rem;color:var(--dim)">(energy only — for hospitalised/increased requirements)</span></label>
+    <div class="sf-group"><button class="sf active" id="sf-1" onclick="setSF(1.0)">None ×1.0</button><button class="sf" id="sf-12" onclick="setSF(1.2)">×1.2</button><button class="sf" id="sf-13" onclick="setSF(1.3)">×1.3</button></div>
+    <div class="hint">Apply only if evidence of hypermetabolism. Protein is not adjusted by stress factor.</div>
+  </div>
+  <div id="infant-result"></div>
+
+  <!-- 0-3y reference table -->
+  <div style="margin-top:1rem">
+    <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('▸')?'▾ Hide reference table':'▸ Show reference table'" style="font-size:.7rem;font-weight:600;color:var(--accent);background:var(--accent-light);border:1.5px solid var(--border);border-radius:6px;padding:.35rem .75rem;cursor:pointer;width:100%;text-align:left">▸ Show reference table</button>
+    <div style="display:none;margin-top:.75rem">
+
+      <div class="ref-e-hdr-label" style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem">Energy — FNB:IOM EER (kcal/day)</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:1rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.45rem .6rem;text-align:left;border-radius:6px 0 0 0">Age group</th>
+            <th style="padding:.45rem .6rem;text-align:center;border-radius:0 6px 0 0">EER formula (kcal/day)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">0–3 months</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);">(89 × wt) − 100 + 175</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">4–6 months</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);">(89 × wt) − 100 + 56</td>
+          </tr>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">7–12 months</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);">(89 × wt) − 100 + 22</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent)">1–3 years</td>
+            <td style="padding:.4rem .6rem;text-align:center;font-weight:600;color:var(--text);">(89 × wt) − 100 + 20</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem">Protein (g/kg/day)</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:.6rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.45rem .6rem;text-align:left;border-radius:6px 0 0 0">Age</th>
+            <th style="padding:.45rem .6rem;text-align:center">Healthy (Australian NRV)</th>
+            <th style="padding:.45rem .6rem;text-align:center;border-radius:0 6px 0 0">Hospitalised / Catch-up (ASPEN/ESPGHAN)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">0–6 months</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">1.43 g/kg <span style="font-weight:400;color:var(--dim)">(AI)</span></td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">2–3 g/kg</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">7–12 months</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">1.60 g/kg <span style="font-weight:400;color:var(--dim)">(AI)</span></td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">2–3 g/kg</td>
+          </tr>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent)">1–3 years</td>
+            <td style="padding:.4rem .6rem;text-align:center;font-weight:600;color:var(--text)">1.08 g/kg <span style="font-weight:400;color:var(--dim)">(RDI)</span></td>
+            <td style="padding:.4rem .6rem;text-align:center;font-weight:600;color:var(--text)">1.5–2 g/kg</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:.67rem;color:var(--dim);padding:.35rem .5rem;border-left:2px solid var(--accent-light);line-height:1.6">
+        FNB:IOM DRI 2002 · Australian NRV · ASPEN/ESPGHAN · WHO minimum protein 9–12% of energy for catch-up growth
+      </div>
+      <div style="font-size:.67rem;color:var(--muted);padding:.4rem .6rem;background:var(--accent-light);border-radius:6px;margin-top:.4rem;line-height:1.7">
+        · Aim <strong>9–12% energy from protein</strong><br>
+        · Infants: caution with intake <strong>&gt;4 g protein/kg/day</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card section" id="sec-child">
+  <div class="ct">Child &gt;3y — Schofield BMR × PAL</div>
+  <div class="g2" style="margin-bottom:1rem">
+    <div><label>Age (years)</label><input type="number" id="child-age" placeholder="3–18" min="3" max="18" oninput="recalc()"></div>
+    <div><label>Clinical status</label><select id="child-status" onchange="recalc();updateChildProtField();updateChildSF()"><option value="healthy">Healthy</option><option value="ill">Hospitalised / Increased requirements / Catch-up growth</option></select></div>
+  </div>
+  <div class="field" id="child-sf-field" style="display:none">
+    <label>Stress Factor <span style="font-size:.65rem;color:var(--dim)">(energy only — for hospitalised/increased requirements)</span></label>
+    <div class="sf-group"><button class="sf active" id="csf-1" onclick="setCSF(1.0)">None ×1.0</button><button class="sf" id="csf-12" onclick="setCSF(1.2)">×1.2</button><button class="sf" id="csf-13" onclick="setCSF(1.3)">×1.3</button></div>
+    <div class="hint">Apply only if evidence of hypermetabolism. Protein is not adjusted by stress factor.</div>
+  </div>
+  <div class="field" id="child-prot-method-field" style="display:none">
+    <label>Protein method (healthy only)</label>
+    <div class="tog-group" id="child-prot-tog">
+      <button class="tog active" onclick="setChildProt('nrv')">Australian NRV</button>
+      <button class="tog" onclick="setChildProt('1gkg')">1 g/kg body weight</button>
+    </div>
+    <div class="hint">Australian NRV: age/sex specific RDA · 1 g/kg: practical clinical target for healthy children</div>
+  </div>
+  <div class="field"><label>PAL — NHMRC 2006</label><div class="pal-grid" id="pal-grid"><div class="pal-opt active" onclick="setPAL(1.2,'Bed rest')"><div class="pv">1.2</div><div class="pd">Bed rest</div></div><div class="pal-opt" onclick="setPAL(1.4,'Very sedentary')"><div class="pv">1.4</div><div class="pd">Very sedentary</div></div><div class="pal-opt" onclick="setPAL(1.6,'Light activity')"><div class="pv">1.6</div><div class="pd">Light activity</div></div><div class="pal-opt" onclick="setPAL(1.8,'Moderate activity')"><div class="pv">1.8</div><div class="pd">Moderate activity</div></div><div class="pal-opt" onclick="setPAL(2.0,'Heavy activity')"><div class="pv">2.0</div><div class="pd">Heavy activity</div></div><div class="pal-opt" onclick="setPAL(2.2,'Vigorous')"><div class="pv">2.2</div><div class="pd">Vigorous</div></div></div></div>
+  <div id="child-result"></div>
+
+  <!-- Child >3y reference table -->
+  <div style="margin-top:1rem">
+    <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('▸')?'▾ Hide reference table':'▸ Show reference table'" style="font-size:.7rem;font-weight:600;color:var(--accent);background:var(--accent-light);border:1.5px solid var(--border);border-radius:6px;padding:.35rem .75rem;cursor:pointer;width:100%;text-align:left">▸ Show reference table</button>
+    <div style="display:none;margin-top:.75rem">
+
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem">Energy — Schofield BMR Equations</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:1rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.45rem .6rem;text-align:left;border-radius:6px 0 0 0">Age</th>
+            <th style="padding:.45rem .6rem;text-align:center">Male BMR (kcal/day)</th>
+            <th style="padding:.45rem .6rem;text-align:center;border-radius:0 6px 0 0">Female BMR (kcal/day)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">3–10 years</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);">22.706W + 504.3</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);">20.315W + 485.9</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent)">10–18 years</td>
+            <td style="padding:.4rem .6rem;text-align:center;font-weight:600;color:var(--text);">17.686W + 658.2</td>
+            <td style="padding:.4rem .6rem;text-align:center;font-weight:600;color:var(--accent);">13.384W + 692.6</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:.67rem;color:var(--dim);margin-bottom:1rem;padding:.35rem .5rem;border-left:2px solid var(--accent-light)">
+        EER = BMR × PAL · W = weight in kg · Schofield 1985 | NHMRC PAL 2006
+      </div>
+
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem">Protein — Australian NRV (g/kg/day)</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:.6rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.45rem .6rem;text-align:left;border-radius:6px 0 0 0">Age</th>
+            <th style="padding:.45rem .6rem;text-align:center">Male</th>
+            <th style="padding:.45rem .6rem;text-align:center">Female</th>
+            <th style="padding:.45rem .6rem;text-align:center;border-radius:0 6px 0 0">Hosp / Catch-up (ASPEN)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">4–8 years</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">0.91</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">0.91</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">1.5–2.0</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border)">9–13 years</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">0.94</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">0.87</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">1.5–2.0</td>
+          </tr>
+          <tr style="background:var(--accent-light)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent)">14–18 years</td>
+            <td style="padding:.4rem .6rem;text-align:center;font-weight:600;color:var(--text)">0.99</td>
+            <td style="padding:.4rem .6rem;text-align:center;font-weight:600;color:var(--text)">0.77</td>
+            <td style="padding:.4rem .6rem;text-align:center;font-weight:600;color:var(--text)">1.5</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:.67rem;color:var(--dim);padding:.35rem .5rem;border-left:2px solid var(--accent-light);line-height:1.6">
+        Schofield 1985 · Australian NRV · ASPEN paediatric guidelines
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card section" id="sec-adult-out">
+  <div class="ct">Adult Outpatient — Schofield BMR × PAL</div>
+  <div class="field"><label>Age (years)</label><input type="number" id="aout-age" placeholder="e.g. 35" min="18" max="100" oninput="recalc()"></div>
+  <div class="field"><label>PAL — NHMRC 2006</label><div class="pal-grid" id="apal-grid"><div class="pal-opt active" onclick="setAPAL(1.2,'Bed rest')"><div class="pv">1.2</div><div class="pd">Bed rest</div></div><div class="pal-opt" onclick="setAPAL(1.4,'Very sedentary')"><div class="pv">1.4</div><div class="pd">Very sedentary</div></div><div class="pal-opt" onclick="setAPAL(1.6,'Light activity')"><div class="pv">1.6</div><div class="pd">Light activity</div></div><div class="pal-opt" onclick="setAPAL(1.8,'Moderate activity')"><div class="pv">1.8</div><div class="pd">Moderate activity</div></div><div class="pal-opt" onclick="setAPAL(2.0,'Heavy activity')"><div class="pv">2.0</div><div class="pd">Heavy activity</div></div><div class="pal-opt" onclick="setAPAL(2.2,'Vigorous')"><div class="pv">2.2</div><div class="pd">Vigorous</div></div></div></div>
+  <div class="field">
+    <label>Protein requirement</label>
+    <div class="pal-grid" id="aprot-grid">
+      <div class="pal-opt active" onclick="setAProt(0.8,'WHO/FAO RDA')"><div class="pv">0.8</div><div class="pd">g/kg/day<br>WHO/FAO</div></div>
+      <div class="pal-opt" onclick="setAProt(1.0,'Moderate needs')"><div class="pv">1.0</div><div class="pd">g/kg/day<br>Moderate</div></div>
+      <div class="pal-opt" onclick="setAProt(1.2,'Increased needs')"><div class="pv">1.2</div><div class="pd">g/kg/day<br>Increased</div></div>
+    </div>
+  </div>
+  <div id="aout-result"></div>
+</div>
+
+<div class="card section" id="sec-adult-hosp">
+  <div class="ct">Adult Hospitalised</div>
+  <div class="cond-picker">
+    <label for="nemo-condition">Clinical Condition<span class="req" aria-hidden="true">*</span></label>
+    <div class="cond-select-wrap"><select id="nemo-condition" class="cond-select" aria-required="true" onchange="clearFieldError('nemo-condition');updateCondSummary();recalc()"></select></div>
+    <div class="cond-summary" id="cond-summary" aria-live="polite"></div>
+  </div>
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="field" style="margin-bottom:0"><label for="ahosp-age">Age (years)</label><input type="number" id="ahosp-age" placeholder="e.g. 45" min="18" max="100" oninput="recalc()"></div>
+    <div class="field" style="margin-bottom:0"><label>PAL for Schofield<span style="font-size:.65rem;color:var(--dim);font-weight:500;text-transform:none;letter-spacing:0;margin-left:.3rem">1.2–1.4 typical</span></label><div class="pal-grid" id="hpal-grid" style="grid-template-columns:1fr 1fr"><div class="pal-opt active" onclick="setHPAL(1.2,'Bed rest')"><div class="pv">1.2</div><div class="pd">Bed rest</div></div><div class="pal-opt" onclick="setHPAL(1.4,'Very sedentary')"><div class="pv">1.4</div><div class="pd">Very sedentary</div></div><div class="pal-opt" onclick="setHPAL(1.6,'Light')"><div class="pv">1.6</div><div class="pd">Light</div></div><div class="pal-opt" onclick="setHPAL(1.8,'Moderate')"><div class="pv">1.8</div><div class="pd">Moderate</div></div></div></div>
+  </div>
+  <div id="ahosp-result"></div>
+  <div id="hosp-e-choice-section" style="display:none"><div class="ecg" id="hosp-e-choice"></div></div>
+</div>
+
+<div class="card section" id="sec-adult-icu">
+  <div class="ct">Adult ICU — NEMO / ESPEN / ASPEN</div>
+  <div class="field"><label>ICU Phase</label><div class="tog-group" id="icu-phase-tog"><button class="tog active" onclick="setICUPhase('early')">Early phase (day 1–3)</button><button class="tog" onclick="setICUPhase('established')">Established critical illness</button></div></div>
+  <div class="field"><label>AKI modifier</label><select id="icu-aki" onchange="recalc()"><option value="none">No AKI</option><option value="no-dialysis">AKI — no dialysis</option><option value="dialysis">AKI — on dialysis</option></select></div>
+  <div id="aicu-result"></div>
+</div>
+
+<div class="card section" id="sec-picu">
+  <div class="ct">Paediatric ICU — Energy &amp; Protein</div>
+  <div class="hint" style="margin-bottom:.85rem">Uses weight &amp; sex from the Patient card above.</div>
+  <div class="g2" style="margin-bottom:1rem">
+    <div class="field" style="margin-bottom:0">
+      <label>Age (years) <span style="font-size:.65rem;color:var(--dim)">for energy &amp; protein band</span></label>
+      <input type="number" id="picu-age" placeholder="e.g. 5" min="0" max="18" step="0.5" oninput="recalc()">
+      <div class="hint">Age band (ASPEN PICU): 0–2y → 2–3 g/kg · 2–13y → 1.5–2 g/kg · 13–18y → 1.5 g/kg</div>
+    </div>
+    <div class="field" style="margin-bottom:0" id="picu-months-field" style="display:none">
+      <label>Age (months) <span style="font-size:.65rem;color:var(--dim)">for FNB:IOM EER — under 3y</span></label>
+      <input type="number" id="picu-months" placeholder="e.g. 14" min="0" max="35" oninput="recalc()">
+      <div class="hint">0–3m · 4–6m · 7–12m · 1–3y — used for FNB:IOM EER equation</div>
+    </div>
+  </div>
+  <div class="field" style="margin-bottom:1rem">
+    <label>Clinical Phase</label>
+    <div class="tog-group" id="picu-phase-tog">
+      <button class="tog active" onclick="setPICUPhase('acute')">Acute (intubated)</button>
+      <button class="tog" onclick="setPICUPhase('stable')">Stable (&gt;5–7 days)</button>
+      <button class="tog" onclick="setPICUPhase('recovery')">Recovery (extubated)</button>
+    </div>
+  </div>
+  <div id="picu-result"></div>
+
+  <!-- Reference tables -->
+  <div style="margin-top:1rem">
+    <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('▸')?'▾ Hide reference tables':'▸ Show reference tables'" style="font-size:.7rem;font-weight:600;color:var(--accent);background:var(--accent-light);border:1.5px solid var(--border);border-radius:6px;padding:.35rem .75rem;cursor:pointer;width:100%;text-align:left">▸ Show reference tables</button>
+    <div style="display:none;margin-top:.75rem">
+
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem">Energy Targets by Phase — PICU</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:1rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.45rem .6rem;text-align:left;border-radius:6px 0 0 0">Phase</th>
+            <th style="padding:.45rem .6rem;text-align:center">Age 0–3 years</th>
+            <th style="padding:.45rem .6rem;text-align:center;border-radius:0 6px 0 0">Age 3–18 years</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--warn-bg)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--warn);border-bottom:1px solid var(--border)">Acute (intubated)</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">Schofield BMR</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">Schofield BMR</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--accent2);border-bottom:1px solid var(--border)">Stable (&gt;5–7 days)</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">Up to FNB:IOM EER</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">Up to Schofield BMR × 1.2</td>
+          </tr>
+          <tr style="background:var(--success-bg)">
+            <td style="padding:.4rem .6rem;font-weight:600;color:var(--success)">Recovery (extubated)</td>
+            <td style="padding:.4rem .6rem;text-align:center;color:var(--muted)">Starting from FNB:IOM EER</td>
+            <td style="padding:.4rem .6rem;text-align:center;color:var(--muted)">Starting from Schofield BMR × 1.2–1.4</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem">Protein Requirements — ASPEN PICU</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:.75rem">
+        <thead>
+          <tr style="background:var(--accent);color:#fff">
+            <th style="padding:.45rem .6rem;text-align:center;border-radius:6px 0 0 0">Age (years)</th>
+            <th style="padding:.45rem .6rem;text-align:center;border-radius:0 6px 0 0">Protein (g/kg/day)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">0–2</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">2–3</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">2–13</td>
+            <td style="padding:.4rem .6rem;text-align:center;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)">1.5–2</td>
+          </tr>
+          <tr style="background:var(--surface2)">
+            <td style="padding:.4rem .6rem;text-align:center;color:var(--muted)">13–18</td>
+            <td style="padding:.4rem .6rem;text-align:center;font-weight:600;color:var(--text)">1.5</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:.67rem;color:var(--dim);margin-top:-.4rem;margin-bottom:.75rem;padding:.35rem .5rem;border-left:2px solid var(--accent-light)">
+        ※ Minimum 1.5 g/kg/day applies across all age groups
+      </div>
+
+      <div style="background:var(--accent-light);border:1.5px solid var(--border);border-radius:8px;padding:.65rem .85rem;font-size:.7rem;color:var(--muted);line-height:1.8">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:.3rem">⬆ Consider higher protein if:</div>
+        · Disease-specific needs (renal / burns / cardiac)<br>
+        · Additional therapies — RRT<br>
+        · Faltering growth neonates (up to 4 g/kg)<br>
+        · Large wounds or other losses<br>
+        · Other co-morbidities (e.g. chylothorax)
+        <div style="margin-top:.4rem;font-size:.63rem;color:var(--dim)">ASPEN PICU Guidelines 2017</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="wn" style="margin-top:.75rem">⚠ Indirect calorimetry is the gold standard where available. Schofield BMR should be used without activity or stress factors in acute phase. Adjust targets as clinical condition evolves.</div>
+</div>
+
+<div class="card">
+  <div class="ct">Fluid Requirements</div>
+  <div class="hint" style="margin-bottom:.75rem" id="fluid-hint">💡 Method auto-switches between paediatric and adult when you change patient type</div>
+  <div class="field"><label>Method</label>
+    <div class="tog-group" id="fluid-tog">
+      <button class="tog active" id="fl-hs" onclick="setFluid('hs')">Holliday-Segar (paeds)</button>
+      <button class="tog" id="fl-hj" onclick="setFluid('hj')">Hull &amp; Johnson (paeds)</button>
+      <button class="tog" id="fl-nemo" onclick="setFluid('nemo')">NEMO weight-based (adult)</button>
+      <button class="tog" id="fl-doc" onclick="setFluid('doc')">Doctor prescribed</button>
+    </div>
+  </div>
+  <div id="fluid-hs-section">
+    <div class="field"><label>Modifier</label><select id="fluid-mod" onchange="recalc()"><option value="1.0">Full maintenance ×1.0</option><option value="0.67">2/3 maintenance ×0.67</option><option value="0.8">80% maintenance ×0.8</option><option value="1.5">1.5× maintenance</option></select></div>
+    <div id="fluid-hs-result"></div>
+  </div>
+  <div id="fluid-hj-section" style="display:none">
+    <div class="field"><label>Age (months) — Hull &amp; Johnson lookup</label><input type="number" id="hj-months" placeholder="e.g. 8" min="0" oninput="recalc()"><div class="hint">0–6m: 150 ml/kg · 6–12m: 120 ml/kg · 12–24m: 100 ml/kg · ≥24m: 80 ml/kg · Hull &amp; Johnson 4th Ed 1999</div></div>
+    <div id="fluid-hj-result"></div>
+  </div>
+  <div id="fluid-nemo-section" style="display:none">
+    <div id="fluid-nemo-result"></div>
+    <div class="field" style="margin-top:.75rem"><label>Override target (ml/kg/day)</label><select id="fluid-nemo-rate" onchange="recalc()"><option value="30-35">30–35 ml/kg/day (default)</option><option value="30">30 ml/kg/day</option><option value="35">35 ml/kg/day</option><option value="25">25 ml/kg/day (elderly/cardiac)</option></select></div>
+  </div>
+  <div id="fluid-doc-section" style="display:none">
+    <div class="field"><label>Doctor prescribed (free text)</label><input type="text" id="fluid-doc-text" placeholder="e.g. 2/3 maintenance = 1200 ml/day" oninput="recalc()"></div>
+  </div>
+</div>
+
+<div class="brow-wrap">
+  <div class="brow-hint" id="gen-hint">Enter weight above to get started — button will activate when ready</div>
+  <div class="brow">
+    <button class="btn btn-p btn-generate" id="gen-btn" onclick="generateOutput()">⬇ Generate Notes Output</button>
+  </div>
+  <div class="brow" style="margin-top:.5rem">
+    <button class="btn btn-s" style="flex:1;justify-content:center" onclick="resetAll()">↺ Reset all fields</button>
+  </div>
+</div>
+
+<div id="output-section" style="display:none">
+  <div class="owrap">
+    <div class="olabel">NUTRITIONAL REQUIREMENTS — ready to paste</div>
+    <button class="cbtn" id="copy-btn" onclick="copyOutput()">Copy</button>
+    <div class="otext" id="output-text"></div>
+  </div>
+</div>
+
+<footer style="margin-top:2rem;padding:1rem 1.25rem;border-top:1px solid var(--border);font-size:.68rem;color:var(--dim);line-height:1.6;text-align:center">
+  <div><strong style="color:var(--muted)">NourishCal</strong> — By Aminath Iasha, Accredited Practising Dietitian</div>
+  <div style="margin-top:.2rem">Developed with assistance from Claude AI (Anthropic). For clinical use — always verify against current guidelines and apply clinical judgement.</div>
+  <div class="version-line">v0.5 · Updated April 2026 · References: ESPGHAN 2022 · Koletzko 2021 · ASPEN 2018 · ASPEN PICU 2017 · ESPEN ICU 2019 · Schofield 1985 · FNB:IOM 2002 · NHMRC PAL 2006 · NEMO</div>
+</footer>
+
+</div>
+<script>
+const S={type:'infant',route:'enteral',sf:1.0,csf:1.0,pal:1.2,palLabel:'Bed rest',apal:1.2,apalLabel:'Bed rest',aprot:0.8,aprotLabel:'WHO/FAO RDA',hpal:1.2,hpalLabel:'Bed rest',fluidMode:'hs',icuPhase:'early',picuPhase:'acute',picuAcuteChoice:'bmr',adultAgeGrp:'under65',energyUnit:'kcal',pretEChoice:null,pretPChoice:null,hospEChoice:null,childProtMethod:'nrv'};
+
+// --- Inline validation helpers ---
+function showFieldError(id,msg){const el=document.getElementById(id);if(!el)return;el.classList.add('has-error');el.setAttribute('aria-invalid','true');let err=document.getElementById(id+'-error');if(!err){err=document.createElement('div');err.id=id+'-error';err.className='field-error';err.setAttribute('role','alert');el.parentNode.insertBefore(err,el.nextSibling);}err.textContent=msg;}
+function clearFieldError(id){const el=document.getElementById(id);if(el){el.classList.remove('has-error');el.removeAttribute('aria-invalid');}const err=document.getElementById(id+'-error');if(err)err.remove();}
+function showSectionError(anchorId,msg){const a=document.getElementById(anchorId);if(!a)return;let err=document.getElementById(anchorId+'-error');if(!err){err=document.createElement('div');err.id=anchorId+'-error';err.className='section-error';err.setAttribute('role','alert');a.appendChild(err);}err.textContent=msg;}
+function clearSectionError(id){const e=document.getElementById(id+'-error');if(e)e.remove();}
+function clearAllErrors(){document.querySelectorAll('.has-error').forEach(el=>{el.classList.remove('has-error');el.removeAttribute('aria-invalid');});document.querySelectorAll('.field-error,.section-error').forEach(el=>el.remove());}
+function focusFirstError(){const f=document.querySelector('.has-error,.section-error');if(!f)return;if(typeof f.focus==='function')f.focus({preventScroll:true});f.scrollIntoView({behavior:'smooth',block:'center'});}
+
+// --- NEMO category map + dynamic dropdown ---
+const NEMO_CATEGORIES=[
+  {key:'normo',label:'Not Hypermetabolic',badge:'Normo',cls:'',keys:['not-hyper-general','not-hyper-cva','not-hyper-elderly','not-hyper-aki']},
+  {key:'mod',label:'Moderately Hypermetabolic',badge:'Moderate',cls:'cat-mod',keys:['mod-postop','mod-panc','mod-pressure','mod-cancer','mod-liver-stable','mod-ibd-active']},
+  {key:'hyper',label:'Hypermetabolic',badge:'Hyper',cls:'cat-hyper',keys:['hyper-burns','hyper-liver']},
+  {key:'special',label:'Special Conditions',badge:'Special',cls:'cat-special',keys:['ckd-1-2','ckd-3-5','ckd-hd-pd','refeeding']}
+];
+function nemoCategoryFor(key){return NEMO_CATEGORIES.find(c=>c.keys.includes(key));}
+function nemoOptionLabel(key){
+  const c=NEMO[key];if(!c)return '';
+  const u=eUnit(),kj=S.energyUnit==='kj';
+  const lo=kj?Math.round(c.eL*KJ):c.eL,hi=kj?Math.round(c.eH*KJ):c.eH;
+  if(c.refeeding)return `${c.label} — goal targets (EN/PN start 50%)`;
+  if(key==='mod-cancer')return `${c.label} — ≥${lo} ${u}/kg`;
+  return `${c.label} — ${lo}${lo===hi?'':'–'+hi} ${u}/kg`;
+}
+function buildNemoOptions(){
+  const sel=document.getElementById('nemo-condition');if(!sel)return;
+  const cur=sel.value;
+  const ph='<option value="" disabled selected>— Select clinical condition —</option>';
+  const groups=NEMO_CATEGORIES.map(cat=>{
+    const opts=cat.keys.filter(k=>NEMO[k]).map(k=>`<option value="${k}">${nemoOptionLabel(k)}</option>`).join('');
+    return `<optgroup label="${cat.label}">${opts}</optgroup>`;
+  }).join('');
+  sel.innerHTML=ph+groups;
+  if(cur&&NEMO[cur])sel.value=cur;
+}
+function updateCondSummary(){
+  const sel=document.getElementById('nemo-condition'),sum=document.getElementById('cond-summary');
+  if(!sel||!sum)return;
+  const k=sel.value;
+  if(!k||!NEMO[k]){sum.innerHTML='<span style="color:var(--muted);font-weight:500">Select a condition above to calculate energy targets</span>';return;}
+  const c=NEMO[k],cat=nemoCategoryFor(k)||{badge:'',cls:''};
+  const u=eUnit(),kj=S.energyUnit==='kj';
+  const lo=kj?Math.round(c.eL*KJ):c.eL,hi=kj?Math.round(c.eH*KJ):c.eH;
+  const range=c.refeeding?'goal targets':(lo===hi?`${lo} ${u}/kg`:`${lo}–${hi} ${u}/kg`);
+  sum.innerHTML=`<span class="cat-badge ${cat.cls}">${cat.badge}</span><span>${c.label}</span><span class="cond-range">· ${range} · protein ${c.pNote}</span>`;
+}
+const r0=n=>Math.round(n),r1=n=>Math.round(n*10)/10,r2=n=>Math.round(n*100)/100;
+function pctEP(e,p){return r1((p*4)/e*100);}
+// Energy unit helpers — all internal calcs in kcal, convert for display
+const KJ=4.184;
+function toE(kcal){return S.energyUnit==='kj'?r0(kcal*KJ):r0(kcal);}
+function eUnit(){return S.energyUnit==='kj'?'kJ':'kcal';}
+function updateRefTables(){
+  const kj=S.energyUnit==='kj';
+  const unit=kj?'kJ':'kcal';
+  // Update all ref-e cells
+  document.querySelectorAll('.ref-e').forEach(td=>{
+    const lo=parseFloat(td.dataset.lo),hi=parseFloat(td.dataset.hi),note=td.dataset.note;
+    const loD=kj?Math.round(lo*4.184):lo,hiD=kj?Math.round(hi*4.184):hi;
+    let html=`${loD}–${hiD}`;
+    if(note){
+      const noteD=kj?Math.round(parseFloat(note)*4.184):parseFloat(note);
+      html+=` <span style="font-weight:400;color:var(--dim)">(up to ${noteD})</span>`;
+    }
+    td.innerHTML=html;
+  });
+  // Update column headers
+  document.querySelectorAll('.ref-e-hdr').forEach(th=>{
+    th.textContent=th.textContent.includes('/day')?`Energy (${unit}/kg/day)`:`Energy (${unit}/kg)`;
+  });
+}
+
+function updateRefTables(){
+  const kj=S.energyUnit==='kj';
+  const K=4.184;
+  const cv=v=>Math.round(v*K);
+  document.querySelectorAll('.ref-e[data-lo]').forEach(el=>{
+    const lo=parseFloat(el.dataset.lo),hi=parseFloat(el.dataset.hi),note=el.dataset.note;
+    if(isNaN(lo))return;
+    if(kj){
+      const loK=cv(lo),hiK=cv(hi);
+      el.innerHTML=lo===hi?`${loK}`:`${loK}–${hiK}`;
+      if(note)el.innerHTML+=` <span style="font-weight:400;color:var(--dim)">(up to ${cv(parseFloat(note))})</span>`;
+    } else {
+      el.innerHTML=lo===hi?`${lo}`:`${lo}–${hi}`;
+      if(note)el.innerHTML+=` <span style="font-weight:400;color:var(--dim)">(up to ${note})</span>`;
+    }
+  });
+  const unit=kj?'kJ':'kcal';
+  document.querySelectorAll('.ref-e-hdr').forEach(el=>{el.textContent=el.textContent.replace(/kcal|kJ/g,unit);});
+  document.querySelectorAll('.ref-e-hdr-label').forEach(el=>{el.textContent=el.textContent.replace(/kcal|kJ/g,unit);});
+}
+
+function setEnergyUnit(u){
+  S.energyUnit=u;
+  const kcalBtn=document.getElementById('unit-kcal');
+  const kjBtn=document.getElementById('unit-kj');
+  if(kcalBtn){kcalBtn.style.background=u==='kcal'?'#fff':'transparent';kcalBtn.style.color=u==='kcal'?'var(--accent)':'rgba(255,255,255,.8)';kcalBtn.setAttribute('aria-pressed',u==='kcal');}
+  if(kjBtn){kjBtn.style.background=u==='kj'?'#fff':'transparent';kjBtn.style.color=u==='kj'?'var(--accent)':'rgba(255,255,255,.8)';kjBtn.setAttribute('aria-pressed',u==='kj');}
+  updateRefTables();
+  if(typeof buildNemoOptions==='function')buildNemoOptions();
+  if(typeof updateCondSummary==='function')updateCondSummary();
+  try{recalc();}catch(e){console.warn('recalc error on unit toggle:',e);}
+}
+
+function calcABW(){
+  const w=parseFloat(document.getElementById('weight').value),h=parseFloat(document.getElementById('height').value);
+  if(!w||!h)return null;
+  const hm=h/100,bmi=r1(w/(hm*hm)),ibw25=r1(25*hm*hm),ibw30=r1(30*hm*hm);
+  const elderly=S.adultAgeGrp==='over65';
+  const ibwBase=elderly?ibw30:ibw25;
+  const abw=bmi>25?r1(ibwBase+(w-ibwBase)*0.25):null;
+  return{bmi,ibw25,ibw30,ibwBase,abw,actual:w};
+}
+function setAdultAgeGrp(g){
+  S.adultAgeGrp=g;
+  document.querySelectorAll('#age-grp-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setAdultAgeGrp('${g}')`));
+  // Swap dropdown options based on age group
+  const sel=document.getElementById('wt-choice');
+  if(!sel)return;
+  const cur=sel.value;
+  if(g==='under65'){
+    sel.innerHTML=`<option value="actual">Actual weight</option><option value="ibw25">IBW (BMI 25)</option><option value="abw">Adjusted body weight — IBW at BMI 25</option>`;
+  } else {
+    sel.innerHTML=`<option value="actual">Actual weight</option><option value="ibw30">IBW (BMI 30)</option><option value="abw">Adjusted body weight — IBW at BMI 30</option>`;
+  }
+  // Try to preserve selection if still valid
+  if([...sel.options].some(o=>o.value===cur))sel.value=cur;
+  recalc();
+}
+
+function renderABW(){
+  const el=document.getElementById('abw-result'),recEl=document.getElementById('nemo-wt-rec'),a=calcABW();
+  if(!a){el.innerHTML='';if(recEl)recEl.innerHTML='';return;}
+  const elderly=S.adultAgeGrp==='over65';
+  const ibwVal=elderly?a.ibw30:a.ibw25;
+  const ibwLabel=elderly?'IBW(30)':'IBW(25)';
+  const abwVal=a.bmi>25?r1(ibwVal+(a.actual-ibwVal)*0.25):null;
+
+  // Live weight display
+  el.innerHTML=`<div class="abw-b">
+    BMI ${a.bmi} kg/m²
+    &nbsp;|&nbsp; Actual <strong>${a.actual}kg</strong>
+    &nbsp;|&nbsp; ${ibwLabel} <strong>${ibwVal}kg</strong>
+    ${abwVal?`&nbsp;|&nbsp; ABW <strong>${abwVal}kg</strong>`:'&nbsp;|&nbsp; <span style="color:var(--dim)">ABW — n/a (BMI ≤25)</span>'}
+  </div>`;
+
+  // Contextual prompt
+  if(recEl){
+    const rec=getNEMORec(a.bmi,elderly);
+    const col=rec.wtKey==='actual'?'var(--accent2)':rec.wtKey==='abw'?'var(--warn)':'var(--accent)';
+    recEl.innerHTML=`<div class="hint" style="margin-top:.3rem">💡 <span style="color:${col};font-weight:600">${rec.rec}</span> suggested — ${rec.label}</div>`;
+  }
+}
+
+function getNEMORec(bmi,elderly){
+  if(elderly){
+    if(bmi<23)return{rec:'Actual weight',wtKey:'actual',label:'BMI <23 (>65y) → Actual'};
+    if(bmi<=30)return{rec:'Actual weight',wtKey:'actual',label:'BMI 23–30 (>65y) → Actual'};
+    if(bmi<=35)return{rec:'IBW at BMI 30',wtKey:'ibw30',label:'BMI 31–35 (>65y) → IBW at BMI 30'};
+    return{rec:'Adjusted body weight (ABW)',wtKey:'abw',label:'BMI >35 (>65y) → ABW'};
+  } else {
+    if(bmi<20)return{rec:'Actual weight',wtKey:'actual',label:'BMI <20 (<65y) → Actual'};
+    if(bmi<=25)return{rec:'Actual weight',wtKey:'actual',label:'BMI 20–25 (<65y) → Actual'};
+    if(bmi<=35)return{rec:'IBW at BMI 25',wtKey:'ibw25',label:'BMI 26–35 (<65y) → IBW at BMI 25'};
+    return{rec:'Adjusted body weight (ABW)',wtKey:'abw',label:'BMI >35 (<65y) → ABW'};
+  }
+}
+function getWt(){
+  const actual=parseFloat(document.getElementById('weight').value);if(!actual)return null;
+  if(['adult-out','adult-hosp','adult-icu'].includes(S.type)){
+    const ch=document.getElementById('wt-choice')?.value||'actual',a=calcABW();
+    if(ch==='ibw25'&&a)return r1(a.ibw25);
+    if(ch==='ibw30'&&a)return r1(a.ibw30);
+    if(ch==='abw'&&a&&a.abw)return r1(a.abw);
+  }
+  return actual;
+}
+
+function setType(t){
+  clearAllErrors();
+  S.type=t;
+  document.querySelectorAll('#type-tog-paeds .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setType('${t}')`));
+  document.querySelectorAll('#type-tog-adult .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setType('${t}')`));
+  // Show/hide sections
+  ['preterm','infant','child','adult-out','adult-hosp','adult-icu','picu'].forEach(s=>document.getElementById('sec-'+s).classList.toggle('visible',s===t));
+  const isA=['adult-out','adult-hosp','adult-icu'].includes(t);
+  const isPaeds=['preterm','infant','child','picu'].includes(t);
+  // Height only relevant for adults (BMI/IBW)
+  const hf=document.getElementById('height-field');
+  if(hf)hf.style.display=isA?'block':'none';
+  document.getElementById('abw-section').style.display=isA?'block':'none';
+  document.getElementById('fl-hs').style.display=isA?'none':'inline-flex';
+  document.getElementById('fl-hj').style.display=isA?'none':'inline-flex';
+  document.getElementById('fl-nemo').style.display=isA?'inline-flex':'none';
+  if(isA&&(S.fluidMode==='hs'||S.fluidMode==='hj'))setFluid('nemo');
+  if(!isA&&S.fluidMode==='nemo')setFluid('hs');
+  updateSteps();
+  recalc();
+}
+
+function updateSteps(){
+  const hasWeight=!!parseFloat(document.getElementById('weight').value);
+  const step1done=hasWeight;
+  const step2done=step1done;
+  const step3done=step2done;
+  document.getElementById('step1').className='step '+(step1done?'done':'active');
+  document.getElementById('step2').className='step '+(step2done?'done':step1done?'active':'');
+  document.getElementById('step3').className='step '+(step3done?'done':step2done?'active':'');
+  document.getElementById('step4').className='step '+(step3done?'active':'');
+  // Generate button ready state
+  const genBtn=document.querySelector('.btn-generate');
+  if(genBtn)genBtn.classList.toggle('ready',hasWeight);
+  // Generate button hint text
+  const genHint=document.getElementById('gen-hint');
+  if(genHint)genHint.textContent=hasWeight?'Looking good — click to generate your clinical notes output':'Enter weight above to get started — button will activate when ready';
+  const ph=document.getElementById('preterm-hint');
+  if(ph){
+    const hasResult=document.getElementById('preterm-result')?.innerHTML.trim().length>0;
+    ph.style.display=hasResult?'none':'block';
+  }
+}
+function setRoute(r){S.route=r;document.querySelectorAll('#route-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setRoute('${r}')`));recalc();}
+function setSF(v,silent){S.sf=v;['1','12','13'].forEach(k=>document.getElementById('sf-'+k)?.classList.remove('active'));document.getElementById('sf-'+{1.0:'1',1.2:'12',1.3:'13'}[v])?.classList.add('active');if(!silent)recalc();}
+function setCSF(v,silent){S.csf=v;['1','12','13'].forEach(k=>document.getElementById('csf-'+k)?.classList.remove('active'));document.getElementById('csf-'+{1.0:'1',1.2:'12',1.3:'13'}[v])?.classList.add('active');if(!silent)recalc();}
+function setChildProt(m){S.childProtMethod=m;document.querySelectorAll('#child-prot-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setChildProt('${m}')`));recalc();}
+function updateChildProtField(){
+  const status=document.getElementById('child-status')?.value;
+  const f=document.getElementById('child-prot-method-field');
+  if(f)f.style.display=(status==='healthy'&&S.type==='child')?'block':'none';
+}
+function updateInfantSF(){
+  const status=document.getElementById('inf-status')?.value;
+  const f=document.getElementById('inf-sf-field');
+  if(f){
+    f.style.display=status==='ill'?'block':'none';
+    if(status==='healthy'){setSF(1.0,true);}
+  }
+}
+function updateChildSF(){
+  const status=document.getElementById('child-status')?.value;
+  const f=document.getElementById('child-sf-field');
+  if(f){
+    f.style.display=status==='ill'?'block':'none';
+    if(status==='healthy'){setCSF(1.0,true);}
+  }
+}
+function updateInfantStatus(){
+  const months=parseInt(document.getElementById('inf-months').value);
+  const hint=document.getElementById('inf-age-hint');
+  if(!hint)return;
+  if(isNaN(months)||months<0){hint.textContent='';return;}
+  if(months>35){hint.textContent='⚠ Maximum 35 months for this section — use Child >3y tab for older children';hint.style.color='var(--warn)';return;}
+  const yrs=Math.floor(months/12),rem=months%12;
+  const label=months<=3?'0–3 months':months<=6?'4–6 months':months<=12?'7–12 months':'1–3 years';
+  hint.textContent=`${yrs}y ${rem}m — FNB:IOM age group: ${label}`;
+  hint.style.color='var(--accent2)';
+}
+function setPAL(v,l){S.pal=v;S.palLabel=l;document.querySelectorAll('#pal-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
+function setAPAL(v,l){S.apal=v;S.apalLabel=l;document.querySelectorAll('#apal-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
+function setAProt(v,l){S.aprot=v;S.aprotLabel=l;document.querySelectorAll('#aprot-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
+function setHPAL(v,l){S.hpal=v;S.hpalLabel=l;document.querySelectorAll('#hpal-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
+function setICUPhase(p){S.icuPhase=p;document.querySelectorAll('#icu-phase-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setICUPhase('${p}')`));recalc();}
+function setPICUPhase(p){S.picuPhase=p;document.querySelectorAll('#picu-phase-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setPICUPhase('${p}')`));recalc();}
+function setPicuAcuteChoice(c){S.picuAcuteChoice=c;recalc();}
+function setFluid(m){S.fluidMode=m;['hs','hj','nemo','doc'].forEach(x=>{document.getElementById('fl-'+x)?.classList.toggle('active',x===m);const s=document.getElementById('fluid-'+x+'-section');if(s)s.style.display=x===m?'block':'none';});recalc();}
+
+
+const NEMO={
+  'not-hyper-general':{eL:25,eH:35,pL:0.8,pH:1.5,pNote:'0.8–1.5 g/kg',label:'General hospitalised',src:'NEMO Nutrition Support Group / NICE 2006'},
+  'not-hyper-cva':{eL:25,eH:30,pL:0.8,pH:1.0,pNote:'0.8–1 g/kg',label:'CVA / IBD remission',src:'NEMO Nutrition Support Group / Stroke Foundation 2019'},
+  'not-hyper-elderly':{eL:25,eH:30,pL:1.0,pH:1.5,pNote:'1–1.5 g/kg',label:'Acute elderly',src:'NEMO Nutrition Support Group / ESPEN Geriatrics 2019'},
+  'not-hyper-aki':{eL:25,eH:35,pL:0.8,pH:1.0,pNote:'0.8–1 g/kg',label:'AKI non-catabolic (no dialysis)',src:'NEMO Nutrition Support Group / ESPEN CKD 2021'},
+  'mod-postop':{eL:30,eH:35,pL:1.2,pH:1.5,pNote:'1.2–1.5 g/kg',label:'Post-op/infection/trauma/COPD',src:'NEMO Nutrition Support Group / ESPEN Surgery 2017'},
+  'mod-panc':{eL:25,eH:35,pL:1.0,pH:1.5,pNote:'1.0–1.5 g/kg',label:'Pancreatitis',src:'NEMO Nutrition Support Group / ESPEN 2020'},
+  'mod-pressure':{eL:30,eH:35,pL:1.2,pH:1.5,pNote:'1.2–1.5 g/kg',label:'Pressure injury',src:'NEMO Nutrition Support Group / EPUAP 2019'},
+  'mod-cancer':{eL:30,eH:35,pL:1.4,pH:1.4,pNote:'≥1.4 g/kg',label:'Cancer cachexia',src:'NEMO Nutrition Support Group / Bauer 2006'},
+  'mod-liver-stable':{eL:30,eH:35,pL:1.2,pH:1.5,pNote:'1.2–1.5 g/kg',label:'Liver disease stable',src:'NEMO Nutrition Support Group / EASL 2019'},
+  'mod-ibd-active':{eL:25,eH:30,pL:1.2,pH:1.5,pNote:'1.2–1.5 g/kg',label:"IBD active/Crohn's",src:'NEMO Nutrition Support Group / ESPEN IBD 2020'},
+  'hyper-burns':{eL:35,eH:40,pL:1.5,pH:2.0,pNote:'1.5–2.0 g/kg',label:'Burns >20% FTB',src:'NEMO Nutrition Support Group / ESPEN Burns 2013'},
+  'hyper-liver':{eL:35,eH:40,pL:1.2,pH:1.5,pNote:'1.2–1.5 g/kg',label:'Decompensated liver/failure',src:'NEMO Nutrition Support Group / EASL 2019'},
+  'ckd-1-2':{eL:25,eH:35,pL:0.75,pH:1.0,pNote:'0.75–1 g/kg',label:'CKD Stage 1–2',src:'NEMO Nutrition Support Group / ESPEN CKD 2021'},
+  'ckd-3-5':{eL:25,eH:35,pL:0.55,pH:0.8,pNote:'0.55–0.8 g/kg',label:'CKD Stage 3–5 (no dialysis)',src:'NEMO Nutrition Support Group / KDOQI 2020'},
+  'ckd-hd-pd':{eL:25,eH:35,pL:1.0,pH:1.2,pNote:'1.0–1.2 g/kg',label:'CKD Stage 5 HD/PD',src:'NEMO Nutrition Support Group / KDOQI 2020'},
+  'refeeding':{eL:25,eH:35,pL:0.8,pH:1.5,pNote:'At goal (EN/PN: start 50%)',label:'Refeeding risk',src:'NEMO Nutrition Support Group / QH 2018',refeeding:true},
+};
+
+// Preterm sources — all in kcal/kg
+function pretEsp(wg){
+  if(wg<1800)return{eL:115,eH:140,eNote:'115–140 kcal/kg/day',pL:3.5,pH:4.0,pNote:'3.5–4.0 g/kg/day (max 4.5)',wLabel:'<1800g'};
+  if(wg<=2000)return{eL:110,eH:130,eNote:'110–130 kcal/kg/day',pL:3.0,pH:4.0,pNote:'3.0–4.0 g/kg/day',wLabel:'1800–2000g'};
+  if(wg<=2500)return{eL:110,eH:130,eNote:'110–130 kcal/kg/day',pL:2.5,pH:3.5,pNote:'2.5–3.5 g/kg/day',wLabel:'2000–2500g'};
+  return{eL:105,eH:120,eNote:'105–120 kcal/kg/day',pL:2.0,pH:2.5,pNote:'2.0–2.5 g/kg/day',wLabel:'>2500g'};
+}
+function pretKol(wg){
+  if(wg<1800)return{eL:115,eH:140,eNote:'115–140 kcal/kg/day',pL:3.5,pH:4.0,pNote:'3.5–4.0 g/kg/day',wLabel:'<1800g'};
+  if(wg<=2000)return{eL:110,eH:130,eNote:'110–130 kcal/kg/day',pL:3.0,pH:4.0,pNote:'3.0–4.0 g/kg/day',wLabel:'1800–2000g'};
+  if(wg<=2500)return{eL:110,eH:130,eNote:'110–130 kcal/kg/day',pL:2.5,pH:3.5,pNote:'2.5–3.5 g/kg/day',wLabel:'2000–2500g'};
+  return{eL:105,eH:120,eNote:'105–120 kcal/kg/day',pL:2.0,pH:2.5,pNote:'2.0–2.5 g/kg/day',wLabel:'>2500g'};
+}
+function pretAsp(gaW,route){
+  if(route==='enteral'){if(gaW<34)return{eL:110,eH:130,eNote:'110–130 kcal/kg/day',pL:3.5,pH:4.5,pNote:'3.5–4.5 g/kg/day',gaLabel:'<34w enteral'};if(gaW<=36)return{eL:120,eH:135,eNote:'120–135 kcal/kg/day',pL:3.0,pH:3.2,pNote:'3.0–3.2 g/kg/day',gaLabel:'34–36w enteral'};return{eL:105,eH:120,eNote:'105–120 kcal/kg/day',pL:2.0,pH:2.5,pNote:'2.0–2.5 g/kg/day',gaLabel:'≥37w enteral'};}
+  else{if(gaW<34)return{eL:85,eH:111,eNote:'85–111 kcal/kg/day',pL:3.0,pH:4.0,pNote:'3.0–4.0 g/kg/day',gaLabel:'<34w parenteral'};if(gaW<=36)return{eL:100,eH:110,eNote:'100–110 kcal/kg/day',pL:3.0,pH:3.5,pNote:'3.0–3.5 g/kg/day',gaLabel:'34–36w parenteral'};return{eL:90,eH:108,eNote:'90–108 kcal/kg/day',pL:2.5,pH:3.0,pNote:'2.5–3.0 g/kg/day',gaLabel:'≥37w parenteral'};}
+}
+
+function calcPreterm(){
+  const wkg=parseFloat(document.getElementById('weight').value),gaW=parseInt(document.getElementById('ga-weeks').value);
+  const el=document.getElementById('preterm-result'),eCS=document.getElementById('preterm-e-choice-section'),pCS=document.getElementById('preterm-p-choice-section');
+  if(!wkg||!gaW){el.innerHTML='';eCS.style.display='none';pCS.style.display='none';return;}
+  const wg=wkg*1000,route=S.route;
+  const esp=pretEsp(wg),kol=pretKol(wg),asp=pretAsp(gaW,route);
+  // Classification badges (GA + birth weight)
+  const gaCls=gaW<28?{lbl:'Extremely Preterm',col:'#9333ea'}:gaW<37?{lbl:'Preterm',col:'var(--warn)'}:gaW<=41?{lbl:'Term',col:'var(--accent2)'}:{lbl:'Post-term',col:'var(--warn)'};
+  const bwCls=wg<1000?{lbl:'ELBW',col:'#9333ea'}:wg<1500?{lbl:'VLBW',col:'var(--warn)'}:wg<2500?{lbl:'LBW',col:'var(--warn)'}:{lbl:'Normal BW',col:'var(--accent2)'};
+  const badges=`<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem"><span style="background:${gaCls.col};color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.06em;padding:.22rem .6rem;border-radius:5px;text-transform:uppercase">${gaCls.lbl}</span><span style="background:${bwCls.col};color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.06em;padding:.22rem .6rem;border-radius:5px;text-transform:uppercase">${bwCls.lbl}</span></div>`;
+  // Near-term transition banner — mentor RCH: ~38w GA or ~2.5kg
+  const showTransition=gaW>=38||wkg>=2.5;
+  const transitionBanner=showTransition?`<div style="background:var(--accent-light);border:1.5px solid var(--accent);border-radius:8px;padding:.65rem .85rem;margin-bottom:.75rem;font-size:.72rem;color:var(--accent);line-height:1.55">💡 <strong>Near term</strong> (${gaW>=38?'GA ≥38w':''}${gaW>=38&&wkg>=2.5?' · ':''}${wkg>=2.5?'≥2.5kg':''}) — consider transitioning to Term infant equations (FNB:IOM EER + NRV protein). Continue with preterm targets if growth/clinical picture indicate. <button onclick="setType('infant')" style="background:var(--accent);color:#fff;border:none;border-radius:5px;padding:.22rem .6rem;font-size:.68rem;font-weight:600;cursor:pointer;margin-left:.3rem">Switch to Infant tab →</button></div>`:'';
+  el.innerHTML=`${badges}${transitionBanner}<div style="margin-bottom:.5rem;font-family:var(--mono);font-size:.7rem;color:var(--muted)">All values for <strong style="color:var(--accent2)">${wkg}kg</strong> · GA ${gaW}w · ${route}</div>
+  <div class="fb">
+    <div style="color:var(--accent);margin-bottom:.4rem">Energy (kcal/kg/day → ${eUnit()}/day)</div>
+    <div><span class="src-tag">ESPGHAN 2022</span> <span class="fl">${esp.eNote}</span> = <strong style="color:var(--accent2)">${toE(r0(esp.eL*wkg))}–${toE(r0(esp.eH*wkg))} ${eUnit()}/day</strong> <span style="color:var(--dim)">(wt ${esp.wLabel})</span></div>
+    <div><span class="src-tag">Koletzko 2021</span> <span class="fl">${kol.eNote}</span> = <strong style="color:var(--accent2)">${toE(r0(kol.eL*wkg))}–${toE(r0(kol.eH*wkg))} ${eUnit()}/day</strong> <span style="color:var(--dim)">(wt ${kol.wLabel})</span></div>
+    <div><span class="src-tag">ASPEN 2018</span> <span class="fl">${asp.eNote}</span> = <strong style="color:var(--accent2)">${toE(r0(asp.eL*wkg))}–${toE(r0(asp.eH*wkg))} ${eUnit()}/day</strong> <span style="color:var(--dim)">(GA ${asp.gaLabel})</span></div>
+    <div style="color:var(--accent);margin-top:.75rem;margin-bottom:.4rem">Protein (g/kg/day → g/day)</div>
+    <div><span class="src-tag">ESPGHAN 2022</span> <span class="fl">${esp.pNote}</span> = <strong style="color:var(--accent2)">${r1(esp.pL*wkg)}–${r1(esp.pH*wkg)} g/day</strong></div>
+    <div><span class="src-tag">Koletzko 2021</span> <span class="fl">${kol.pNote}</span> = <strong style="color:var(--accent2)">${r1(kol.pL*wkg)}–${r1(kol.pH*wkg)} g/day</strong></div>
+    <div><span class="src-tag">ASPEN 2018</span> <span class="fl">${asp.pNote}</span> = <strong style="color:var(--accent2)">${r1(asp.pL*wkg)}–${r1(asp.pH*wkg)} g/day</strong></div>
+    <div class="fsrc">ESPGHAN 2022 · Koletzko 2021 · ASPEN 2018</div>
+  </div>`;
+  const eSrcs=[{key:'espghan',lbl:'ESPGHAN 2022',val:`${toE(r0(esp.eL*wkg))}–${toE(r0(esp.eH*wkg))} ${eUnit()}/day`,desc:`${esp.eNote} · weight-based (${esp.wLabel})`},{key:'koletzko',lbl:'Koletzko 2021',val:`${toE(r0(kol.eL*wkg))}–${toE(r0(kol.eH*wkg))} ${eUnit()}/day`,desc:`${kol.eNote} · weight-based (${kol.wLabel})`},{key:'aspen',lbl:'ASPEN 2018',val:`${toE(r0(asp.eL*wkg))}–${toE(r0(asp.eH*wkg))} ${eUnit()}/day`,desc:`${asp.eNote} · GA-based (${asp.gaLabel})`}];
+  document.getElementById('preterm-e-choice').innerHTML=eSrcs.map(s=>`<div class="ec ${S.pretEChoice===s.key?'sel':''}" onclick="pickPretE('${s.key}')"><input type="radio" name="prete" ${S.pretEChoice===s.key?'checked':''}><div class="ec-body"><div class="ec-val">${s.val}</div><div class="ec-desc">${s.lbl} · ${s.desc}</div></div></div>`).join('');
+  eCS.style.display='block';
+  const pSrcs=[{key:'espghan',lbl:'ESPGHAN 2022',val:`${r1(esp.pL*wkg)}–${r1(esp.pH*wkg)} g/day`,desc:esp.pNote},{key:'koletzko',lbl:'Koletzko 2021',val:`${r1(kol.pL*wkg)}–${r1(kol.pH*wkg)} g/day`,desc:kol.pNote},{key:'aspen',lbl:'ASPEN 2018',val:`${r1(asp.pL*wkg)}–${r1(asp.pH*wkg)} g/day`,desc:asp.pNote}];
+  document.getElementById('preterm-p-choice').innerHTML=pSrcs.map(s=>`<div class="ec ${S.pretPChoice===s.key?'sel':''}" onclick="pickPretP('${s.key}')"><input type="radio" name="pretp" ${S.pretPChoice===s.key?'checked':''}><div class="ec-body"><div class="ec-val">${s.val}</div><div class="ec-desc">${s.lbl} · ${s.desc}</div></div></div>`).join('');
+  pCS.style.display='block';
+}
+function pickPretE(k){S.pretEChoice=k;clearSectionError('preterm-e-choice-section');const keys=['espghan','koletzko','aspen'];document.querySelectorAll('#preterm-e-choice .ec').forEach((el,i)=>{el.classList.toggle('sel',keys[i]===k);el.querySelector('input').checked=keys[i]===k;});}
+function pickPretP(k){S.pretPChoice=k;clearSectionError('preterm-p-choice-section');const keys=['espghan','koletzko','aspen'];document.querySelectorAll('#preterm-p-choice .ec').forEach((el,i)=>{el.classList.toggle('sel',keys[i]===k);el.querySelector('input').checked=keys[i]===k;});}
+
+function calcInfant(){
+  const wkg=parseFloat(document.getElementById('weight').value),months=parseInt(document.getElementById('inf-months').value),status=document.getElementById('inf-status').value,sf=S.sf,el=document.getElementById('infant-result');
+  if(!wkg||isNaN(months)){el.innerHTML='';return;}
+  if(months>35){el.innerHTML='<div class="wn">⚠ Age exceeds 35 months — please use the <strong>Child &gt;3y</strong> tab.</div>';return;}
+  let dep,ageLabel;
+  if(months<=3){dep=175;ageLabel='0–3 months';}else if(months<=6){dep=56;ageLabel='4–6 months';}else if(months<=12){dep=22;ageLabel='7–12 months';}else{dep=20;ageLabel='1–3 years';}
+  const depLabel=months<=12?'energy deposition':'energy deposition';
+  const baseE=r0(89*wkg-100+dep),energyKcal=r0(baseE*sf),energy=toE(energyKcal),sfStr=sf>1?` × ${sf} stress factor = ${energy} ${eUnit()}/day`:'';
+  let protGkg,protLabel,protTotalLo,protTotalHi,protSource;
+  if(status==='healthy'){const gkg=months<=6?1.43:months<=12?1.60:1.08;protGkg=String(gkg);protLabel=months<=6?'AI 0–6m':months<=12?'AI 6–12m':'RDI 1–3y';protTotalLo=r2(gkg*wkg);protTotalHi=null;protSource='Australian NRV (healthy)';}
+  else{const lo=months<=24?2:1.5,hi=months<=24?3:2;protGkg=`${lo}–${hi}`;protLabel='Increased requirements / Catch-up growth';protTotalLo=r1(lo*wkg);protTotalHi=r1(hi*wkg);protSource='ASPEN/ESPGHAN';}
+  const protStr=protTotalHi?`${protTotalLo}–${protTotalHi}g/day`:`${protTotalLo}g/day`;
+  const protMid=protTotalHi?(protTotalLo+protTotalHi)/2:protTotalLo;
+  const pct=pctEP(energy,protMid);
+  const pctLow=status!=='healthy'&&pct<9;
+  const pctWarn=pctLow?`<div class="wn">⚠ % energy from protein is ${pct}% — below the WHO minimum of 9% for catch-up growth. Consider increasing protein intake or reviewing energy target to bring this into range (aim 9–12%).</div>`:'';
+  const statusBadge=status==='ill'?`<span style="background:var(--warn-bg);border:1px solid var(--warn-border);color:var(--warn);font-size:.6rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;margin-left:.4rem">HOSPITALISED</span>`:`<span style="background:var(--accent-light);border:1px solid var(--border);color:var(--accent);font-size:.6rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;margin-left:.4rem">HEALTHY</span>`;
+  el.innerHTML=`
+  <div style="margin-bottom:.5rem;font-family:var(--mono);font-size:.7rem;color:var(--muted)">${wkg}kg · ${months}m (${ageLabel})${statusBadge}</div>
+  <div class="rg"><div class="rc highlight"><div class="rl">Energy (EER)</div><div class="rv">${energy}</div><div class="ru">${eUnit()}/day</div><div class="rs">${sf>1?`stress ×${sf}`:'FNB:IOM EER'}</div></div><div class="rc"><div class="rl">Protein</div><div class="rv">${protStr}</div><div class="ru">${protGkg} g/kg/day</div></div><div class="rc ${pctLow?'warn':''}"><div class="rl">% E from protein</div><div class="rv ${pctLow?'warn':''}">${pct}%</div><div class="ru">WHO min 9–12%${pctLow?' ⚠':' ✓'}</div></div></div>
+  <div class="fb">
+    <div style="color:var(--accent)">Energy — FNB:IOM EER (${ageLabel}):</div>
+    <div class="fl">EER = (89 × ${wkg}) − 100 + ${dep} <span style="color:var(--dim)">[${dep} = energy deposition, ${ageLabel}]</span> = ${toE(baseE)} ${eUnit()}/day${sfStr}</div>
+    <div style="margin-top:.5rem;color:var(--accent)">Protein — ${protSource} (${protLabel}):</div>
+    <div class="fl">${protGkg} g/kg/day × ${wkg}kg = ${protStr}</div>
+    <div class="fl">% E from protein = (${r1(protMid)}g × 4 kcal) ÷ ${energyKcal} kcal × 100 = ${pct}%${pctLow?' — below WHO min 9%; increase protein or review energy':' — within WHO range'}</div>
+    <div class="fsrc">FNB:IOM DRI 2002 | ${protSource} | WHO minimum protein 9–12% of energy for catch-up growth</div>
+  </div>${pctWarn}`;
+}
+
+function schofield(age,sex,w){if(age<3)return sex==='M'?59.48*w-30.33:58.29*w-31.05;if(age<10)return sex==='M'?22.706*w+504.3:20.315*w+485.9;if(age<18)return sex==='M'?17.686*w+658.2:13.384*w+692.6;if(age<30)return sex==='M'?15.057*w+692.2:14.818*w+486.6;if(age<60)return sex==='M'?11.472*w+873.1:8.126*w+845.6;return sex==='M'?11.711*w+587.7:9.082*w+658.5;}
+function schEq(age,sex){if(age<3)return sex==='M'?'59.48W−30.33':'58.29W−31.05';if(age<10)return sex==='M'?'22.706W+504.3':'20.315W+485.9';if(age<18)return sex==='M'?'17.686W+658.2':'13.384W+692.6';if(age<30)return sex==='M'?'15.057W+692.2':'14.818W+486.6';if(age<60)return sex==='M'?'11.472W+873.1':'8.126W+845.6';return sex==='M'?'11.711W+587.7':'9.082W+658.5';}
+function agGrp(a){if(a<3)return'0–3y';if(a<10)return'3–10y';if(a<18)return'10–18y';if(a<30)return'18–30y';if(a<60)return'30–60y';return'>60y';}
+
+function calcChild(){
+  const wkg=getWt(),age=parseInt(document.getElementById('child-age').value),sex=document.getElementById('sex').value,status=document.getElementById('child-status').value,el=document.getElementById('child-result');
+  if(!wkg||!age||!sex){el.innerHTML=!sex&&wkg&&age?'<div class="wn">⚠ Please select sex.</div>':'';return;}
+  const bmr=r0(schofield(age,sex,wkg)),tee=r0(bmr*S.pal),energyKcal=r0(tee*S.csf),energy=toE(energyKcal),sfStr=S.csf>1?` × ${S.csf} = ${energy} ${eUnit()}/day`:'';
+  let protGkg,protLabel,protStr,protMid,protSource;
+  if(status==='healthy'){
+    let gkg,protLabelCard;
+    if(S.childProtMethod==='1gkg'){gkg=1.0;protLabelCard='1 g/kg/day (clinical target)';}
+    else{gkg=age<=8?0.91:sex==='M'?(age<=13?0.94:0.99):(age<=13?0.87:0.77);protLabelCard=age<=8?'RDI 4–8y':sex==='M'?(age<=13?'RDI 9–13y M':'RDI 14–18y M'):(age<=13?'RDI 9–13y F':'RDI 14–18y F');}
+    protGkg=String(gkg);protLabel=protLabelCard;protStr=`${r2(gkg*wkg)}g/day`;protMid=gkg*wkg;protSource=S.childProtMethod==='1gkg'?'1 g/kg clinical target':'Australian NRV (healthy)';
+  }
+  else{const lo=1.5,hi=age<=13?2:1.5;protGkg=`${lo}–${hi}`;protLabel='Increased requirements / Catch-up growth';protStr=`${r1(lo*wkg)}–${r1(hi*wkg)}g/day`;protMid=(lo+hi)/2*wkg;protSource='ASPEN';}
+  const pct=pctEP(energyKcal,protMid);
+  const pctWarn=status!=='healthy'&&pct<9?`<div class="wn">⚠ % energy from protein: ${pct}% — below WHO minimum of 9%.</div>`:'';
+  el.innerHTML=`<div class="rg"><div class="rc"><div class="rl">BMR</div><div class="rv">${toE(bmr)}</div><div class="ru">${eUnit()}/day</div></div><div class="rc"><div class="rl">Energy (EER)</div><div class="rv">${energy}</div><div class="ru">${eUnit()}/day</div><div class="rs">PAL ${S.pal} (${S.palLabel})</div></div><div class="rc ${status!=='healthy'&&pct<9?'warn':''}"><div class="rl">% E from protein</div><div class="rv ${status!=='healthy'&&pct<9?'warn':''}">${pct}%</div><div class="ru">WHO min 9–12%</div></div></div><div class="rg2" style="margin-top:.75rem"><div class="rc"><div class="rl">Protein</div><div class="rv">${protStr}</div><div class="ru">${protGkg} g/kg/day</div></div><div class="rc"><div class="rl">Wt used</div><div class="rv">${wkg}kg</div><div class="ru">${agGrp(age)} · ${sex}</div></div></div>
+  <div class="fb"><div style="color:var(--accent)">Schofield (${agGrp(age)}, ${sex==='M'?'Male':'Female'}):</div><div class="fl">BMR = ${schEq(age,sex)} = ${toE(bmr)} ${eUnit()}/day</div><div>EER = ${toE(bmr)} × ${S.pal} (${S.palLabel}) = ${toE(tee)} ${eUnit()}/day${sfStr}</div><div style="margin-top:.5rem;color:var(--accent)">Protein — ${protSource}:</div><div class="fl">${protLabel}: ${protGkg} g/kg/day × ${wkg}kg = ${protStr}</div><div class="fl">% E from protein = ${pct}%</div><div class="fsrc">Schofield 1985 | NHMRC PAL 2006 | ${protSource}</div></div>${pctWarn}`;
+}
+
+function calcAdultOut(){
+  const wkg=getWt(),age=parseInt(document.getElementById('aout-age').value),sex=document.getElementById('sex').value,el=document.getElementById('aout-result');
+  if(!wkg||!age||!sex){el.innerHTML=!sex&&wkg&&age?'<div class="wn">⚠ Please select sex.</div>':'';return;}
+  const bmr=r0(schofield(age,sex,wkg)),energy=r0(bmr*S.apal);
+  const prot=r1(S.aprot*wkg),protGkg=S.aprot;
+  el.innerHTML=`<div class="rg"><div class="rc"><div class="rl">BMR</div><div class="rv">${toE(bmr)}</div><div class="ru">${eUnit()}/day</div></div><div class="rc"><div class="rl">EER</div><div class="rv">${toE(energy)}</div><div class="ru">${eUnit()}/day</div><div class="rs">PAL ${S.apal} (${S.apalLabel})</div></div><div class="rc"><div class="rl">Protein (EPR)</div><div class="rv">${prot}</div><div class="ru">g/day</div><div class="rs">${protGkg} g/kg/day</div></div><div class="rc"><div class="rl">Wt used</div><div class="rv">${wkg}kg</div><div class="ru">${agGrp(age)} · ${sex}</div></div></div>
+  <div class="fb"><div style="color:var(--accent)">Schofield (${agGrp(age)}, ${sex==='M'?'Male':'Female'}):</div><div class="fl">BMR = ${schEq(age,sex)} = ${toE(bmr)} ${eUnit()}/day</div><div>EER = ${toE(bmr)} × ${S.apal} (${S.apalLabel}) = ${toE(energy)} ${eUnit()}/day</div><div style="margin-top:.5rem;color:var(--accent)">Protein (${S.aprotLabel}):</div><div class="fl">EPR = ${protGkg} g/kg/day × ${wkg}kg = ${prot} g/day</div><div class="fsrc">Schofield 1985 | NHMRC PAL 2006 | ${S.aprotLabel}</div></div>`;
+}
+
+function calcAdultHosp(){
+  const wkg=getWt();
+  const age=parseInt(document.getElementById('ahosp-age').value);
+  const sex=document.getElementById('sex').value;
+  const condKey=document.getElementById('nemo-condition').value;
+  const cond=NEMO[condKey];
+  const el=document.getElementById('ahosp-result');
+  if(!el)return;
+  if(!wkg||!cond){el.innerHTML='';return;}
+  const eWtL=r0(cond.eL*wkg),eWtH=r0(cond.eH*wkg),pL=r1(cond.pL*wkg),pH=r1(cond.pH*wkg);
+  const scholE=(age&&sex)?r0(schofield(age,sex,wkg)*S.hpal):null;
+  const u=eUnit();
+  const refNote=cond.refeeding?'<div class="wn" style="margin-top:.65rem">⚠ Refeeding: EN/PN start at 50% targets — increase gradually.</div>':'';
+  const nemoSel=S.hospEChoice==='nemo';
+  const nemoCard=`<div class="method-card ${nemoSel?'sel':''}" onclick="pickHospE('nemo')" role="radio" aria-checked="${nemoSel}" tabindex="0"><div class="mc-head"><span>Weight-based (NEMO)</span><span class="mc-radio" aria-hidden="true"></span></div><div class="mc-val">${toE(eWtL)}–${toE(eWtH)} ${u}/day</div><div class="mc-detail">${cond.eL}–${cond.eH} kcal/kg × ${wkg}kg · ${cond.label}</div><span class="mc-tag">NEMO</span></div>`;
+  const schSel=S.hospEChoice==='schofield';
+  const schCard=scholE!==null
+    ?`<div class="method-card ${schSel?'sel':''}" onclick="pickHospE('schofield')" role="radio" aria-checked="${schSel}" tabindex="0"><div class="mc-head"><span>BMR-based (Schofield)</span><span class="mc-radio" aria-hidden="true"></span></div><div class="mc-val">${toE(scholE)} ${u}/day</div><div class="mc-detail">Schofield BMR × PAL ${S.hpal} (${S.hpalLabel})</div><span class="mc-tag">Schofield</span></div>`
+    :`<div class="method-card disabled" aria-disabled="true"><div class="mc-head"><span>BMR-based (Schofield)</span><span class="mc-radio" aria-hidden="true"></span></div><div class="mc-val" style="color:var(--dim);font-size:.95rem">Enter age + sex to enable</div><div class="mc-detail">Schofield equation requires age and sex</div><span class="mc-tag">Schofield</span></div>`;
+  el.innerHTML=`<div class="method-intro">Two methods are calculated below — pick the one that best fits your patient.</div><div class="method-grid" role="radiogroup" aria-label="Energy calculation method">${nemoCard}${schCard}</div><div class="rg2"><div class="rc"><div class="rl">Protein</div><div class="rv">${pL}–${pH}</div><div class="ru">g/day</div><div class="rs">${cond.pNote}</div></div></div>${refNote}<div class="fb"><div style="color:var(--accent);font-weight:600;margin-bottom:.2rem">${cond.label}</div><div class="fl">NEMO: ${cond.eL}–${cond.eH} kcal/kg × ${wkg}kg = ${toE(eWtL)}–${toE(eWtH)} ${u}/day</div>${scholE!==null?`<div class="fl">Schofield BMR: ${schEq(age,sex)} = ${toE(r0(schofield(age,sex,wkg)))} ${u} BMR × ${S.hpal} PAL = ${toE(scholE)} ${u}/day</div>`:'<div class="fl" style="color:var(--dim)">Schofield BMR: enter age + sex to calculate</div>'}<div class="fl">Protein: ${cond.pNote} × ${wkg}kg = ${pL}–${pH} g/day</div><div class="fsrc">${cond.src} | NEMO Nutrition Support Group</div></div>`;
+}
+function pickHospE(k){
+  if(k==='schofield'){const age=parseInt(document.getElementById('ahosp-age').value),sex=document.getElementById('sex').value;if(!age||!sex)return;}
+  S.hospEChoice=k;
+  clearSectionError('ahosp-result');
+  if(S.type==='adult-hosp')calcAdultHosp();
+}
+
+function calcAdultICU(){
+  const wkg=getWt(),el=document.getElementById('aicu-result');if(!wkg){el.innerHTML='';return;}
+  const phase=S.icuPhase,aki=document.getElementById('icu-aki').value;
+  const eL=phase==='early'?20:25,eH=phase==='early'?25:30;
+  const akiPL=aki==='no-dialysis'?1.0:aki==='dialysis'?1.3:1.2,akiPH=aki==='no-dialysis'?1.3:aki==='dialysis'?1.7:2.0;
+  el.innerHTML=`<div class="rg"><div class="rc"><div class="rl">Energy</div><div class="rv">${toE(r0(eL*wkg))}–${toE(r0(eH*wkg))}</div><div class="ru">${eUnit()}/day</div><div class="rs">${eL}–${eH} kcal/kg/day</div></div><div class="rc"><div class="rl">Protein</div><div class="rv">${r1(akiPL*wkg)}–${r1(akiPH*wkg)}</div><div class="ru">g/day</div><div class="rs">${akiPL}–${akiPH} g/kg${aki!=='none'?' (AKI)':''}</div></div><div class="rc"><div class="rl">Phase</div><div class="rv">${phase==='early'?'Early':'Established'}</div><div class="ru">${wkg}kg</div></div></div>
+  <div class="fb"><div style="color:var(--accent)">ICU ${phase==='early'?'early phase':'established'}:</div><div class="fl">${eL}–${eH} kcal/kg × ${wkg}kg = ${toE(r0(eL*wkg))}–${toE(r0(eH*wkg))} ${eUnit()}/day</div><div class="fl">${akiPL}–${akiPH} g/kg × ${wkg}kg = ${r1(akiPL*wkg)}–${r1(akiPH*wkg)} g/day${aki==='no-dialysis'?' (AKI no dialysis: 1.0–1.3)':aki==='dialysis'?' (AKI on dialysis: 1.3–1.7)':''}</div>${phase==='early'?'<div style="color:var(--warn)">⚠ Early phase: prefer below 70% estimated needs in first week (ESPEN 2019).</div>':''}<div class="fsrc">Estimating energy, protein & fluid requirements for adult clinical conditions | NEMO Nutrition Support Group | ESPEN ICU 2019 | ASPEN 2022</div></div>`;
+}
+
+function calcPICU(){
+  const wkg=parseFloat(document.getElementById('weight').value);
+  const sex=document.getElementById('sex').value;
+  const ageRaw=parseFloat(document.getElementById('picu-age').value);
+  const age=!isNaN(ageRaw)&&ageRaw>=0?ageRaw:null;
+  const monthsRaw=parseInt(document.getElementById('picu-months').value);
+  const months=!isNaN(monthsRaw)&&monthsRaw>=0?monthsRaw:null;
+  const el=document.getElementById('picu-result');
+
+  // Show months field only when age <3 is entered
+  const monthsField=document.getElementById('picu-months-field');
+  monthsField.style.display=(age!==null&&age<3)?'block':'none';
+
+  if(!wkg){el.innerHTML='';return;}
+
+  const phase=S.picuPhase;
+  const ageGrp=age!==null&&age>=3?'3-18':'0-3';
+
+  // --- ENERGY ---
+  let eLabel='',eVal='',ePAL='',eNote='',eFormula='',acuteSelectorBlock='';
+
+  if(ageGrp==='0-3'){
+    // FNB:IOM EER inline — needs months
+    let eer=null,dep=null,ageMonthLabel='';
+    if(months!==null){
+      if(months<=3){dep=175;ageMonthLabel='0–3 months';}
+      else if(months<=6){dep=56;ageMonthLabel='4–6 months';}
+      else if(months<=12){dep=22;ageMonthLabel='7–12 months';}
+      else{dep=20;ageMonthLabel='1–3 years';}
+      eer=r0(89*wkg-100+dep);
+    }
+
+    if(phase==='acute'){
+      // Schofield BMR 0–3y (weight-only) + FNB:IOM EER + midpoint
+      const bmr=sex?r0(schofield(1,sex,wkg)):null; // age<3 triggers 0-3 band; age value inside band doesn't matter for weight-only eq
+      const bmrEq=sex?(sex==='M'?`59.48 × ${wkg} − 30.33`:`58.29 × ${wkg} − 31.05`):'';
+      const mid=(bmr!==null&&eer!==null)?r0((bmr+eer)/2):null;
+      const chosenKey=S.picuAcuteChoice||'bmr';
+      const chosen=chosenKey==='mid'?mid:chosenKey==='nrv'?eer:bmr;
+      const chosenLbl=chosenKey==='mid'?'Midpoint (BMR + NRV)':chosenKey==='nrv'?'FNB:IOM EER (NRV)':'Schofield BMR';
+      const missing=[];
+      if(!sex)missing.push('sex');
+      if(months===null)missing.push('age in months');
+      const missingMsg=missing.length?`Select ${missing.join(' + ')} in Patient card`:'';
+      eLabel=`Acute — ${chosenLbl} (selected)`;
+      eVal=chosen!==null?`${toE(chosen)} ${eUnit()}/day`:(missingMsg||'—');
+      eNote='Acute/intubated (<3y): Schofield BMR for general / trauma patients. Midpoint or NRV for cardiac / ↑ baseline metabolism. No PAL or stress factor applied. Transition to NRVs when no longer acutely intubated — timing is clinician-determined per patient.';
+      const bmrLine=bmr!==null?`Schofield BMR (0–3y ${sex==='M'?'Male':'Female'}): ${bmrEq} = ${toE(bmr)} ${eUnit()}/day`:(sex?'':'Schofield BMR: select sex');
+      const eerLine=eer!==null?`FNB:IOM EER: 89 × ${wkg} − 100 + ${dep} = ${toE(eer)} ${eUnit()}/day (${ageMonthLabel})`:'FNB:IOM EER: enter age in months';
+      const midLine=mid!==null?`Midpoint (BMR + NRV)/2 = ${toE(mid)} ${eUnit()}/day`:'';
+      eFormula=[bmrLine,eerLine,midLine].filter(Boolean).join(' · ');
+      ePAL='×1.0';
+      // Build 3-card clickable selector
+      const mkCard=(key,lbl,val,ctx)=>{
+        const isSel=chosenKey===key;
+        const valStr=val!==null?`${toE(val)} ${eUnit()}/day`:'—';
+        const missingTag=val===null?'<span style="font-size:.58rem;color:var(--dim);font-weight:400"> (missing inputs)</span>':'';
+        return `<div class="rc${isSel?' highlight':''}" onclick="setPicuAcuteChoice('${key}')" style="cursor:pointer${isSel?';border-color:var(--accent);box-shadow:0 0 0 2px rgba(26,107,92,.18)':''}"><div class="rl">${lbl}${isSel?' ✓':''}</div><div class="rv" style="font-size:${valStr.length>14?'.82rem':valStr.length>10?'.9rem':'1rem'}">${valStr}</div><div class="ru">${ctx}${missingTag}</div></div>`;
+      };
+      acuteSelectorBlock=`<div style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:.75rem 0 .4rem">Acute-phase energy options — click to select for notes output</div><div class="rg">${mkCard('bmr','Schofield BMR',bmr,'General / trauma start')}${mkCard('mid','Midpoint BMR+NRV',mid,'Cardiac / ↑ baseline metabolism')}${mkCard('nrv','FNB:IOM NRV',eer,'Established hypermetabolism')}</div><div class="wn" style="margin-top:.5rem">💡 <strong>Schofield BMR</strong> for general / trauma patients. For <strong>cardiac</strong> patients or those with increased baseline metabolism (e.g. post-cardiac surgery, RRT), consider the <strong>midpoint</strong> or full <strong>NRV</strong>. Transition to NRV target once no longer acutely intubated — timing is patient-specific and clinician-determined.</div>`;
+    } else if(phase==='stable'){
+      eLabel='Up to FNB:IOM EER';
+      eVal=eer?`${toE(eer)} ${eUnit()}/day`:'Enter age in months';
+      eNote='Stable phase (<3y): advance toward full FNB:IOM EER.';
+      eFormula=eer?`EER = 89 × ${wkg} − 100 + ${dep} = ${toE(eer)} ${eUnit()}/day (${ageMonthLabel})`:'Enter age in months for EER';
+      ePAL='';
+    } else {
+      eLabel='Starting from FNB:IOM EER';
+      eVal=eer?`${toE(eer)} ${eUnit()}/day`:'Enter age in months';
+      eNote='Recovery/extubated (<3y): start from FNB:IOM EER; increase for catch-up growth if malnourished.';
+      eFormula=eer?`EER = 89 × ${wkg} − 100 + ${dep} = ${toE(eer)} ${eUnit()}/day (${ageMonthLabel})`:'Enter age in months for EER';
+      ePAL='';
+    }
+  } else {
+    // Schofield BMR for ≥3y
+    let bmr=null,bmrEq='';
+    const needsSex=!sex;
+    const needsAge=age===null;
+    if(age!==null&&sex){
+      bmr=r0(schofield(age,sex,wkg));
+      bmrEq=`${schEq(age,sex)} = ${toE(bmr)} ${eUnit()}/day`;
+    }
+    const missingMsg=needsSex&&needsAge?'Enter age & select sex in Patient card':needsSex?'Select sex in Patient card':needsAge?'Enter age above':'';
+
+    if(phase==='acute'){
+      eLabel='Schofield BMR (no PAL/stress factor)';
+      eVal=bmr?`${toE(bmr)} ${eUnit()}/day`:missingMsg||'—';
+      eNote='Acute/intubated: target BMR only. Avoid overfeeding.';
+      eFormula=bmr?`BMR = ${bmrEq}`:'';
+      ePAL='×1.0';
+    } else if(phase==='stable'){
+      const stableE=bmr?r0(bmr*1.2):null;
+      eLabel='Schofield BMR × 1.2';
+      eVal=stableE?`${toE(stableE)} ${eUnit()}/day`:missingMsg||'—';
+      eNote='Stable phase (≥3y): advance toward Schofield BMR × 1.2 PAL.';
+      eFormula=bmr?`BMR = ${bmrEq} → ×1.2 = ${toE(stableE)} ${eUnit()}/day`:'';
+      ePAL='×1.2';
+    } else {
+      const lo=bmr?r0(bmr*1.2):null,hi=bmr?r0(bmr*1.4):null;
+      eLabel='Schofield BMR × 1.2–1.4';
+      eVal=lo&&hi?`${toE(lo)}–${toE(hi)} ${eUnit()}/day`:missingMsg||'—';
+      eNote='Recovery/extubated (≥3y): target Schofield BMR × 1.2–1.4.';
+      eFormula=bmr?`BMR = ${bmrEq} → ×1.2–1.4 = ${toE(lo)}–${toE(hi)} ${eUnit()}/day`:'';
+      ePAL='×1.2–1.4';
+    }
+  }
+
+  // --- PROTEIN (ASPEN PICU — age in years) ---
+  let pL,pH,pNote,pBand;
+  if(age===null||age<=2){pL=2;pH=3;pNote='2–3 g/kg/day';pBand='0–2 years';}
+  else if(age<=13){pL=1.5;pH=2;pNote='1.5–2 g/kg/day';pBand='2–13 years';}
+  else{pL=1.5;pH=1.5;pNote='1.5 g/kg/day';pBand='13–18 years';}
+  const pLo=r1(pL*wkg),pHi=r1(pH*wkg);
+  const pDisplay=pL===pH?`${pLo}`:`${pLo}–${pHi}`;
+
+  const phaseColor=phase==='acute'?'var(--warn)':phase==='stable'?'var(--accent2)':'var(--success)';
+  const phaseLabel=phase==='acute'?'Acute (intubated)':phase==='stable'?'Stable (>5–7 days)':'Recovery (extubated)';
+  const ageSummary=age!==null?`${age}y`:ageGrp==='0-3'?'<3y (enter age)':'age not entered';
+  const sexLabel=sex?` · ${sex==='M'?'Male':'Female'}`:'';
+
+  el.innerHTML=`
+  <div style="margin-bottom:.6rem;font-family:var(--mono);font-size:.7rem;color:var(--muted)">
+    <strong style="color:${phaseColor}">${phaseLabel}</strong> &nbsp;·&nbsp; ${ageSummary}${sexLabel} &nbsp;·&nbsp; ${wkg}kg
+  </div>
+  ${acuteSelectorBlock}
+  <div class="rg2" style="margin-top:.5rem">
+    ${acuteSelectorBlock?'':`<div class="rc highlight"><div class="rl">Energy target</div><div class="rv" style="font-size:${eVal.length>14?'.78rem':eVal.length>10?'.88rem':'1rem'}">${eVal}</div><div class="ru">${eLabel}</div>${ePAL?`<div class="rs">${ePAL}</div>`:''}</div>`}
+    <div class="rc"><div class="rl">Protein</div><div class="rv">${pDisplay}</div><div class="ru">g/day</div><div class="rs">${pNote}</div></div>
+    <div class="rc"><div class="rl">Weight</div><div class="rv">${wkg}</div><div class="ru">kg</div></div>
+    <div class="rc"><div class="rl">Age band</div><div class="rv" style="font-size:.85rem">${pBand}</div><div class="ru">ASPEN protein</div></div>
+  </div>
+  <div class="fb">
+    <div style="color:var(--accent)">PICU Phase: ${phaseLabel}</div>
+    <div style="color:var(--accent);margin-top:.5rem">Energy — ${eLabel}:</div>
+    <div class="fl">${eFormula||'—'}</div>
+    <div style="margin-top:.2rem;color:var(--muted)">${eNote}</div>
+    <div style="color:var(--accent);margin-top:.5rem">Protein — ASPEN PICU (${pBand}${age===null?' — enter age for exact band':''}):</div>
+    <div class="fl">${pNote} × ${wkg}kg = ${pDisplay} g/day</div>
+    <div style="color:var(--accent);margin-top:.6rem">⬆ Consider higher protein if:</div>
+    <div style="color:var(--muted);font-size:.7rem;line-height:1.8;margin-top:.2rem">· Disease-specific needs (renal / burns / cardiac)<br>· Additional therapies — RRT<br>· Faltering growth neonates (up to 4 g/kg)<br>· Large wounds or other losses<br>· Other co-morbidities (e.g. chylothorax)</div>
+    <div class="fsrc">ASPEN PICU Guidelines 2017 | FNB:IOM DRI 2002 | Schofield 1985</div>
+  </div>`;
+}
+
+function calcFluid(){
+  const wkg=parseFloat(document.getElementById('weight').value);
+  if(S.fluidMode==='hs'){
+    const el=document.getElementById('fluid-hs-result');if(!wkg){el.innerHTML='';return;}
+    let base;if(wkg<=10)base=wkg*100;else if(wkg<=20)base=1000+(wkg-10)*50;else base=1500+(wkg-20)*20;
+    const mod=parseFloat(document.getElementById('fluid-mod').value),total=r0(base*mod);
+    const modLabel=document.getElementById('fluid-mod').options[document.getElementById('fluid-mod').selectedIndex].text;
+    let fml;if(wkg<=10)fml=`${wkg}×100`;else if(wkg<=20)fml=`1000+(${wkg}-10)×50`;else fml=`1500+(${wkg}-20)×20`;
+    el.innerHTML=`<div class="rg2"><div class="rc"><div class="rl">Maintenance</div><div class="rv">${r0(base)}</div><div class="ru">ml/day</div></div><div class="rc"><div class="rl">Prescribed</div><div class="rv">${total}</div><div class="ru">ml/day · ${modLabel.split('×')[0].trim()}</div></div></div><div class="fb"><div style="color:var(--accent)">Holliday-Segar (100/50/20):</div><div class="fl">${fml} = ${r0(base)}ml · ${modLabel}: ${total}ml/day</div><div class="fsrc">Holliday &amp; Segar 1957</div></div>`;
+  } else if(S.fluidMode==='hj'){
+    const el=document.getElementById('fluid-hj-result'),hjM=parseInt(document.getElementById('hj-months').value);if(!wkg||isNaN(hjM)){el.innerHTML='';return;}
+    const rate=hjM<6?150:hjM<12?120:hjM<24?100:80,band=hjM<6?'0–6m':hjM<12?'6–12m':hjM<24?'12–24m':'≥24m',total=r0(rate*wkg);
+    el.innerHTML=`<div class="rg2"><div class="rc"><div class="rl">Rate (${band})</div><div class="rv">${rate} ml/kg</div><div class="ru">${band}</div></div><div class="rc"><div class="rl">Total</div><div class="rv">${total}</div><div class="ru">ml/day</div></div></div><div class="fb"><div style="color:var(--accent)">Hull &amp; Johnson age-based:</div><div class="fl">${rate} ml/kg/day × ${wkg}kg = ${total} ml/day (${band})</div><div class="fsrc">Hull &amp; Johnson Essential Paediatrics 4th Ed 1999</div></div>`;
+  } else if(S.fluidMode==='nemo'){
+    const el=document.getElementById('fluid-nemo-result');if(!wkg){el.innerHTML='';return;}
+    const rateOpt=document.getElementById('fluid-nemo-rate').value;
+    let rangeStr,nemoNote;
+    if(rateOpt==='30-35'){const lo=r0(30*wkg),hi=r0(35*wkg);rangeStr=`${lo}–${hi} ml/day`;nemoNote='30–35 ml/kg/day';}
+    else{const r=parseFloat(rateOpt);rangeStr=`${r0(r*wkg)} ml/day`;nemoNote=`${r} ml/kg/day`;}
+    let nemoB,nemoBand;
+    if(wkg<=60){nemoB='1.5–2L/day';nemoBand='40–60kg';}
+    else if(wkg<=80){nemoB='2–2.5L/day';nemoBand='60–80kg';}
+    else{nemoB='2.5–3L/day';nemoBand='>80kg';}
+    el.innerHTML=`<div class="rg2"><div class="rc highlight"><div class="rl">Fluid target</div><div class="rv" style="font-size:1rem">${rangeStr}</div><div class="ru">${nemoNote}</div></div><div class="rc"><div class="rl">NEMO band</div><div class="rv" style="font-size:.9rem">${nemoB}</div><div class="ru">${nemoBand}</div></div></div><div class="fsrc" style="margin-top:.75rem;font-style:italic;font-size:.65rem;color:var(--dim)">Estimating energy, protein & fluid requirements for adult clinical conditions | NEMO Nutrition Support Group</div>`;
+  }
+}
+
+function recalc(){try{renderABW();if(S.type==='preterm')calcPreterm();if(S.type==='infant'){updateInfantSF();updateInfantStatus();calcInfant();}if(S.type==='child'){updateChildSF();calcChild();}if(S.type==='adult-out')calcAdultOut();if(S.type==='adult-hosp')calcAdultHosp();if(S.type==='adult-icu')calcAdultICU();if(S.type==='picu')calcPICU();calcFluid();updateChildProtField();updateSteps();document.getElementById('output-section').style.display='none';}catch(e){console.warn('NourishCal recalc error:',e);}}
+
+// Init on load
+window.addEventListener('DOMContentLoaded',()=>{
+  const hf=document.getElementById('height-field');if(hf)hf.style.display='none';
+  document.querySelectorAll('#type-tog-paeds .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setType('infant')`));
+  buildNemoOptions();
+  updateCondSummary();
+  updateSteps();
+  updateRefTables();
+});
+
+function generateOutput(){
+  clearAllErrors();
+  const actualWt=parseFloat(document.getElementById('weight').value),usedWt=getWt();
+  if(!usedWt){showFieldError('weight','Please enter patient weight.');focusFirstError();return;}
+  const abw=calcABW();
+  const wtChoice=document.getElementById('wt-choice')?.value||'actual';
+  const elderly=S.adultAgeGrp==='over65';
+  const wtNote=wtChoice==='abw'?`${usedWt}kg (ABW)`:wtChoice==='ibw25'?`${usedWt}kg (IBW at BMI 25)`:wtChoice==='ibw30'&&elderly?`${usedWt}kg (IBW at BMI 30)`:`${usedWt}kg (actual)`;
+  const ibwDisplay=elderly?`IBW(30) ${abw?.ibw30}kg`:`IBW(25) ${abw?.ibw25}kg`;
+  let energyLine='',protLine='',src='';
+
+  if(S.type==='preterm'){
+    const gaW=parseInt(document.getElementById('ga-weeks').value),wg=usedWt*1000,route=S.route;
+    let _e=false;
+    if(!gaW){showFieldError('ga-weeks','Please enter gestational age.');_e=true;}
+    if(!S.pretEChoice){showSectionError('preterm-e-choice-section','Please select an energy source.');_e=true;}
+    if(!S.pretPChoice){showSectionError('preterm-p-choice-section','Please select a protein source.');_e=true;}
+    if(_e){focusFirstError();return;}
+    const eD=S.pretEChoice==='espghan'?pretEsp(wg):S.pretEChoice==='koletzko'?pretKol(wg):pretAsp(gaW,route);
+    const pD=S.pretPChoice==='espghan'?pretEsp(wg):S.pretPChoice==='koletzko'?pretKol(wg):pretAsp(gaW,route);
+    const eLbl=S.pretEChoice==='espghan'?'ESPGHAN 2022':S.pretEChoice==='koletzko'?'Koletzko 2021':'ASPEN 2018';
+    const pLbl=S.pretPChoice==='espghan'?'ESPGHAN 2022':S.pretPChoice==='koletzko'?'Koletzko 2021':'ASPEN 2018';
+    energyLine=`EER: ${toE(r0(eD.eL*usedWt))}–${toE(r0(eD.eH*usedWt))} ${eUnit()}/day (${eD.eNote}) [${eLbl}]`;
+    protLine=`EPR: ${r1(pD.pL*usedWt)}–${r1(pD.pH*usedWt)} g/day (${pD.pNote}) [${pLbl}]`;
+    src=`Energy: ${eLbl} | Protein: ${pLbl}`;
+  } else if(S.type==='infant'){
+    const months=parseInt(document.getElementById('inf-months').value),status=document.getElementById('inf-status').value;
+    if(isNaN(months)){showFieldError('inf-months','Please enter age in months (0–35).');focusFirstError();return;}
+    let dep;if(months<=3)dep=175;else if(months<=6)dep=56;else if(months<=12)dep=22;else dep=20;
+    const energyKcal=r0(r0(89*usedWt-100+dep)*S.sf),sfStr=S.sf>1?` × ${S.sf} stress`:'';
+    energyLine=`EER: ${toE(energyKcal)} ${eUnit()}/day (FNB:IOM 2002${sfStr})`;
+    if(status==='healthy'){const gkg=months<=6?1.43:months<=12?1.60:1.08;protLine=`EPR: ${r2(gkg*usedWt)} g/day (${gkg} g/kg/day — Australian NRV)`;}
+    else{const lo=months<=24?2:1.5,hi=months<=24?3:2;const pct=pctEP(energyKcal,(lo+hi)/2*usedWt);protLine=`EPR: ${r1(lo*usedWt)}–${r1(hi*usedWt)} g/day (${lo}–${hi} g/kg/day — ASPEN/ESPGHAN) [% E from protein: ~${pct}% — WHO min 9–12%]`;}
+    src='FNB:IOM DRI 2002 | Australian NRV / ASPEN/ESPGHAN';
+  } else if(S.type==='child'){
+    const age=parseInt(document.getElementById('child-age').value),sex=document.getElementById('sex').value,status=document.getElementById('child-status').value;
+    let _e=false;
+    if(!age){showFieldError('child-age','Please enter age in years.');_e=true;}
+    if(!sex){showFieldError('sex','Please select sex (in Patient Details above).');_e=true;}
+    if(_e){focusFirstError();return;}
+    const energyKcal=r0(r0(schofield(age,sex,usedWt)*S.pal)*S.csf),sfStr=S.csf>1?` × ${S.csf} stress`:'';
+    energyLine=`EER: ${toE(energyKcal)} ${eUnit()}/day (Schofield BMR × PAL ${S.pal}${sfStr})`;
+    if(status==='healthy'){
+      let gkg,label;
+      if(S.childProtMethod==='1gkg'){gkg=1.0;label='1 g/kg/day clinical target';}
+      else{gkg=age<=8?0.91:sex==='M'?(age<=13?0.94:0.99):(age<=13?0.87:0.77);label='Australian NRV';}
+      protLine=`EPR: ${r2(gkg*usedWt)} g/day (${gkg} g/kg/day — ${label})`;
+    }
+    else{const lo=1.5,hi=age<=13?2:1.5;const pct=pctEP(energyKcal,(lo+hi)/2*usedWt);protLine=`EPR: ${r1(lo*usedWt)}–${r1(hi*usedWt)} g/day (${lo}–${hi} g/kg/day — ASPEN) [% E from protein: ~${pct}% — WHO min 9–12%]`;}
+    src='Schofield 1985 | NHMRC PAL 2006 | Australian NRV / ASPEN';
+  } else if(S.type==='adult-out'){
+    const age=parseInt(document.getElementById('aout-age').value),sex=document.getElementById('sex').value;
+    let _e=false;
+    if(!age){showFieldError('aout-age','Please enter age in years.');_e=true;}
+    if(!sex){showFieldError('sex','Please select sex (in Patient Details above).');_e=true;}
+    if(_e){focusFirstError();return;}
+    energyLine=`EER: ${toE(r0(schofield(age,sex,usedWt)*S.apal))} ${eUnit()}/day (Schofield BMR × PAL ${S.apal} — ${S.apalLabel})`;
+    protLine=`EPR: ${r1(S.aprot*usedWt)} g/day (${S.aprot} g/kg/day — ${S.aprotLabel})`;src='Schofield 1985 | NHMRC PAL 2006';
+  } else if(S.type==='adult-hosp'){
+    const condKey=document.getElementById('nemo-condition').value;
+    let _e=false;
+    if(!condKey||!NEMO[condKey]){showFieldError('nemo-condition','Please select a clinical condition.');_e=true;}
+    if(!S.hospEChoice){showSectionError('ahosp-result','Please pick an energy method (tap one of the cards above).');_e=true;}
+    if(_e){focusFirstError();return;}
+    const cond=NEMO[condKey];
+    const age=parseInt(document.getElementById('ahosp-age').value),sex=document.getElementById('sex').value;
+    let eStr;
+    if(S.hospEChoice==='schofield'&&age&&sex)eStr=`${toE(r0(schofield(age,sex,usedWt)*S.hpal))} ${eUnit()}/day (Schofield BMR × PAL ${S.hpal})`;
+    else eStr=`${toE(r0(cond.eL*usedWt))}–${toE(r0(cond.eH*usedWt))} ${eUnit()}/day (${cond.eL}–${cond.eH} ${eUnit()}/kg/day)`;
+    energyLine=`EER: ${eStr}`;
+    protLine=`EPR: ${r1(cond.pL*usedWt)}–${r1(cond.pH*usedWt)} g/day (${cond.pNote})`;
+    src=`Estimating energy, protein & fluid requirements for adult clinical conditions | NEMO Nutrition Support Group | ${cond.src}`;
+    if(cond.refeeding)protLine+='\n⚠ Refeeding risk: EN/PN commence at 50% targets — increase gradually';
+  } else if(S.type==='adult-icu'){
+    const phase=S.icuPhase,aki=document.getElementById('icu-aki').value;
+    const eL=phase==='early'?20:25,eH=phase==='early'?25:30;
+    const akiPL=aki==='no-dialysis'?1.0:aki==='dialysis'?1.3:1.2,akiPH=aki==='no-dialysis'?1.3:aki==='dialysis'?1.7:2.0;
+    energyLine=`EER: ${toE(r0(eL*usedWt))}–${toE(r0(eH*usedWt))} ${eUnit()}/day (${eL}–${eH} kcal/kg/day — ICU ${phase==='early'?'early phase':'established'})`;
+    protLine=`EPR: ${r1(akiPL*usedWt)}–${r1(akiPH*usedWt)} g/day (${akiPL}–${akiPH} g/kg/day${aki!=='none'?' — AKI adjusted':''})`;
+    src='Estimating energy, protein & fluid requirements for adult clinical conditions | NEMO Nutrition Support Group | ESPEN ICU 2019 | ASPEN 2022';
+    if(phase==='early')protLine+='\n⚠ Early ICU: prefer <70% estimated needs in first week (ESPEN 2019)';
+  } else if(S.type==='picu'){
+    const phase=S.picuPhase;
+    const ageRaw=parseFloat(document.getElementById('picu-age').value);
+    const age=!isNaN(ageRaw)&&ageRaw>=0?ageRaw:null;
+    const monthsRaw=parseInt(document.getElementById('picu-months').value);
+    const months=!isNaN(monthsRaw)&&monthsRaw>=0?monthsRaw:null;
+    const sex=document.getElementById('sex').value;
+    const ageGrp=age!==null&&age>=3?'3-18':'0-3';
+    const phaseLabel=phase==='acute'?'Acute (intubated)':phase==='stable'?'Stable (>5–7 days)':'Recovery (extubated)';
+    const ageLabel=ageGrp==='0-3'?'<3 years':'3–18 years';
+    let eStr='';
+    if(ageGrp==='0-3'){
+      let eer=null,dep=null,ageMonthLabel='';
+      if(months!==null){
+        if(months<=3){dep=175;ageMonthLabel='0–3m';}
+        else if(months<=6){dep=56;ageMonthLabel='4–6m';}
+        else if(months<=12){dep=22;ageMonthLabel='7–12m';}
+        else{dep=20;ageMonthLabel='1–3y';}
+        eer=r0(89*usedWt-100+dep);
+      }
+      const eerStr=eer?`${toE(eer)} ${eUnit()}/day (FNB:IOM EER, ${ageMonthLabel})`:'— (enter age in months)';
+      if(phase==='acute'){
+        // Use selected choice — Schofield BMR (default), midpoint, or NRV
+        const bmr=sex?r0(schofield(1,sex,usedWt)):null;
+        const bmrEq=sex?(sex==='M'?'59.48W−30.33':'58.29W−31.05'):'';
+        const mid=(bmr!==null&&eer!==null)?r0((bmr+eer)/2):null;
+        const choice=S.picuAcuteChoice||'bmr';
+        if(choice==='bmr'){
+          eStr=bmr!==null?`${toE(bmr)} ${eUnit()}/day (Schofield BMR 0–3y ${sex==='M'?'Male':'Female'}, ${bmrEq} — no PAL, acute/intubated)`:'— (select sex for Schofield BMR)';
+        } else if(choice==='mid'){
+          eStr=mid!==null?`${toE(mid)} ${eUnit()}/day (Midpoint: Schofield BMR + FNB:IOM EER ÷ 2 — for cardiac / ↑ baseline metabolism, acute/intubated)`:'— (select sex + enter age in months for midpoint)';
+        } else {
+          eStr=eer!==null?`${toE(eer)} ${eUnit()}/day (FNB:IOM EER/NRV, ${ageMonthLabel} — for established hypermetabolism, acute/intubated)`:'— (enter age in months for NRV)';
+        }
+      }
+      else if(phase==='stable')eStr=`Up to ${eerStr}`;
+      else eStr=`Starting from ${eerStr}`;
+    } else {
+      let bmr=null;
+      if(age!==null&&sex)bmr=r0(schofield(age,sex,usedWt));
+      if(phase==='acute')eStr=bmr?`${toE(bmr)} ${eUnit()}/day (Schofield BMR — no PAL)`:'— (enter age & sex)';
+      else if(phase==='stable')eStr=bmr?`${toE(r0(bmr*1.2))} ${eUnit()}/day (Schofield BMR × 1.2)`:'— (enter age & sex)';
+      else eStr=bmr?`${toE(r0(bmr*1.2))}–${toE(r0(bmr*1.4))} ${eUnit()}/day (Schofield BMR × 1.2–1.4)`:'— (enter age & sex)';
+    }
+    const pL=age===null||age<=2?2:age<=13?1.5:1.5;
+    const pH=age===null||age<=2?3:age<=13?2:1.5;
+    const pBand=age===null||age<=2?'0–2y':age<=13?'2–13y':'13–18y';
+    const pNote=age===null||age<=2?'2–3':age<=13?'1.5–2':'1.5';
+    const pDisplay=pL===pH?`${r1(pL*usedWt)}`:`${r1(pL*usedWt)}–${r1(pH*usedWt)}`;
+    energyLine=`EER: ${eStr}`;
+    protLine=`EPR: ${pDisplay} g/day (${pNote} g/kg/day — ASPEN PICU, ${pBand}, ${phaseLabel}, ${ageLabel})`;
+    src='ASPEN PICU Guidelines 2017 | FNB:IOM DRI 2002 | Schofield 1985';
+    if(phase==='acute')protLine+='\n⚠ Acute PICU: avoid overfeeding — target BMR/EER only in acute/intubated phase';
+    protLine+='\n   Consider ⬆ protein if: RRT / renal / burns / cardiac / large wounds / chylothorax / faltering growth neonates (up to 4 g/kg)';
+  }
+
+  let fluidLine='';
+  if(S.fluidMode==='hs'){let base;const w=actualWt;if(w<=10)base=w*100;else if(w<=20)base=1000+(w-10)*50;else base=1500+(w-20)*20;const mod=parseFloat(document.getElementById('fluid-mod').value),modLabel=document.getElementById('fluid-mod').options[document.getElementById('fluid-mod').selectedIndex].text.split('×')[0].trim();fluidLine=`EFR: ${r0(base*mod)} ml/day (Holliday-Segar${mod<1?' — '+modLabel:''})`;}
+  else if(S.fluidMode==='hj'){const hjM=parseInt(document.getElementById('hj-months').value);if(!isNaN(hjM)){const rate=hjM<6?150:hjM<12?120:hjM<24?100:80;fluidLine=`EFR: ${r0(rate*actualWt)} ml/day (${rate} ml/kg/day — Hull & Johnson)`;}else fluidLine='EFR: —';}
+  else if(S.fluidMode==='nemo'){const rateOpt=document.getElementById('fluid-nemo-rate').value;if(rateOpt==='30-35'){const lo=r0(30*usedWt),hi=r0(35*usedWt);let nemoB;if(actualWt<=60)nemoB='1.5–2L/day';else if(actualWt<=80)nemoB='2–2.5L/day';else nemoB='2.5–3L/day';fluidLine=`EFR: ${lo}–${hi} ml/day (30–35 ml/kg/day · NEMO band: ${nemoB})`;}else{const r=parseFloat(rateOpt);fluidLine=`EFR: ${r0(r*usedWt)} ml/day (${r} ml/kg/day)`;}}
+  else{fluidLine=`EFR: ${document.getElementById('fluid-doc-text').value||'—'}`;}
+
+  const wtBlock=abw&&abw.bmi>25?`Weight: actual ${actualWt}kg | ${ibwDisplay} | ABW ${abw.abw}kg\nUsed for calculations: ${wtNote}`:`Weight used: ${wtNote}`;
+
+  // --- MALDIVES FBDG SERVES CALCULATION ---
+  // Extract numeric energy and protein midpoints from calculated values
+  function extractNum(str){const m=str.match(/[\d]+/);return m?parseInt(m[0]):null;}
+  function extractRange(str){const m=str.match(/([\d]+)[\s]*[–\-][\s]*([\d]+)/);return m?[(parseInt(m[1])+parseInt(m[2]))/2]:null;}
+
+  // Get energy kcal (midpoint if range)
+  let kcal=0;
+  const eMatch=energyLine.match(/([\d]+)[\s]*[–\-][\s]*([\d]+)\s*kcal/);
+  if(eMatch)kcal=(parseInt(eMatch[1])+parseInt(eMatch[2]))/2;
+  else{const em=energyLine.match(/([\d]+)\s*kcal/);if(em)kcal=parseInt(em[1]);}
+
+  // Get protein g/day (midpoint if range)
+  let prot=0;
+  const pMatch=protLine.match(/([\d.]+)[\s]*[–\-][\s]*([\d.]+)\s*g\/day/);
+  if(pMatch)prot=(parseFloat(pMatch[1])+parseFloat(pMatch[2]))/2;
+  else{const pm=protLine.match(/([\d.]+)\s*g\/day/);if(pm)prot=parseFloat(pm[1]);}
+
+  let servesBlock='';
+
+  // --- PAEDIATRIC SERVES (infant & child) ---
+  if(['infant','child'].includes(S.type)){
+    const sex=document.getElementById('sex').value||'';
+
+    // Exchange kcal values for estimation
+    const EX={starch:80,veg:25,fruit:60,dairy:120,prot:55,fat:45};
+    // prot: ~55 kcal average (lean 45, but paed portions include some medium fat foods)
+
+    let serves=null,ageLabel='',note='',bfNote='';
+
+    if(S.type==='infant'){
+      const months=parseInt(document.getElementById('inf-months').value);
+      if(!isNaN(months)){
+        if(months<7){
+          // <7 months: breast milk/formula only, no solid serves
+          serves=null;
+          ageLabel='<7 months';
+          note='Breast milk or formula only — solids not yet recommended at this age.';
+        } else if(months<=12){
+          // 7–12 months: Australian infant table (Table 16)
+          serves={veg:'1½–2',fruit:'½',starch:'1½ + 1 infant cereal',prot:'1',dairy:'½',fat:'½ serve oils/nut paste (4–15g)',extras:'not applicable at this age'};
+          ageLabel='7–12 months';
+          bfNote='Note: Breast milk or formula remains the main milk source at this age (approx. 600ml/day). Dairy serves above refer to yoghurt/cheese as complementary foods only.';
+          // Estimate kcal & protein from serves (including oils: ~9.5g midpoint × 9 kcal/g)
+          const estKcal=r0(1.75*EX.veg+0.5*EX.fruit+2.5*EX.starch+1*EX.prot+0.5*EX.dairy+Math.round(9.5*9));
+          const estProt=r1(1.75*2+0+2.5*2+1*7+0.5*8);
+          serves._estKcal=estKcal;serves._estProt=estProt;
+        } else {
+          // 13–24 months: toddler table (Table 17) — 1–2y
+          serves={veg:'2–3',fruit:'½',starch:'4',prot:'1',dairy:'1–1½',fat:'1 serve (7–10g oils/nut paste)',extras:'small amounts only'};
+          ageLabel='1–2 years (toddler)';
+          const estKcal=r0(2.5*EX.veg+0.5*EX.fruit+4*EX.starch+1*EX.prot+1.25*EX.dairy+Math.round(8.5*9));
+          const estProt=r1(2.5*2+0+4*2+1*7+1.25*8);
+          serves._estKcal=estKcal;serves._estProt=estProt;
+        }
+      }
+    } else if(S.type==='child'){
+      const age=parseInt(document.getElementById('child-age').value);
+      if(age&&sex){
+        // Australian recommended serves table by age/sex
+        // {veg, fruit, starch, prot, dairy}
+        const tbl={
+          M:{3:{v:2.5,f:1,s:4,p:1,d:1.5},8:{v:4.5,f:1.5,s:4,p:1.5,d:2},
+             11:{v:5,f:2,s:5,p:2.5,d:2.5},13:{v:5.5,f:2,s:6,p:2.5,d:3.5},
+             18:{v:5.5,f:2,s:7,p:2.5,d:3.5}},
+          F:{3:{v:2.5,f:1,s:4,p:1,d:1.5},8:{v:4.5,f:1.5,s:4,p:1.5,d:1.5},
+             11:{v:5,f:2,s:4,p:2.5,d:3},13:{v:5,f:2,s:5,p:2.5,d:3.5},
+             18:{v:5,f:2,s:7,p:2.5,d:3.5}}
+        };
+        const sexKey=sex==='M'?'M':'F';
+        const row=tbl[sexKey];
+        // Find correct age bracket
+        let sv;
+        if(age<=3)sv=row[3];
+        else if(age<=8)sv=row[8];
+        else if(age<=11)sv=row[11];
+        else if(age<=13)sv=row[13];
+        else sv=row[18];
+        ageLabel=`${age}y ${sex==='M'?'Male':'Female'}`;
+        serves={veg:String(sv.v),fruit:String(sv.f),starch:String(sv.s),prot:String(sv.p),dairy:String(sv.d),fat:'small amount unsaturated oil/spread'};
+
+        // USDA oils & extras lookup by kcal level
+        const usdaPattern=[
+          {kcal:1000,oils:15,extras:150},{kcal:1200,oils:17,extras:100},
+          {kcal:1400,oils:17,extras:110},{kcal:1600,oils:22,extras:140},
+          {kcal:1800,oils:24,extras:170},{kcal:2000,oils:27,extras:240},
+          {kcal:2200,oils:29,extras:280},{kcal:2400,oils:31,extras:320},
+          {kcal:2600,oils:34,extras:350},{kcal:2800,oils:36,extras:400},
+          {kcal:3000,oils:44,extras:440},{kcal:3200,oils:51,extras:580}
+        ];
+        // USDA oils & extras lookup by calculated EER
+        let nearest=usdaPattern[0];
+        usdaPattern.forEach(row=>{if(Math.abs(row.kcal-kcal)<Math.abs(nearest.kcal-kcal))nearest=row;});
+        serves.fat=`${nearest.oils}g/day oils (USDA pattern at ~${r0(kcal)} kcal EER level)`;
+        serves.extras=`≤${nearest.extras} kcal/day`;
+        const estKcal=r0(sv.v*EX.veg+sv.f*EX.fruit+sv.s*EX.starch+sv.p*EX.prot+sv.d*EX.dairy+nearest.oils*9);
+        const estProt=r1(sv.v*2+0+sv.s*2+sv.p*7+sv.d*8);        serves._estKcal=estKcal;serves._estProt=estProt;
+      }
+    }
+
+    if(serves&&serves._estKcal!==undefined){
+      const estKcal=serves._estKcal,estProt=serves._estProt;
+      const kcalGap=kcal>0?r0(kcal-estKcal):null;
+      const protGap=prot>0?r1(prot-estProt):null;
+      const kcalNote=kcalGap!==null?(kcalGap>50?`↑ ${kcalGap} kcal above standard serves`:kcalGap<-50?`↓ ${Math.abs(kcalGap)} kcal below standard serves`:'✓ Within range'):'';
+      const protNote=protGap!==null?(protGap>1?`↑ ${protGap}g above standard serves`:protGap<-1?`↓ ${Math.abs(protGap)}g below standard serves`:'✓ Within range'):'';
+
+      servesBlock=`\n\nRECOMMENDED DAILY SERVES — Australian Dietary Guidelines (${ageLabel})\n`+
+      `Vegetables:                     ${serves.veg} serves\n`+
+      `Fruit:                          ${serves.fruit} serves\n`+
+      `Grains / cereals / starchy veg: ${serves.starch} serves\n`+
+      `Fish / meat / eggs / lentils:   ${serves.prot} serves\n`+
+      `Milk / yoghurt / cheese:        ${serves.dairy} serves\n`+
+      `Oils:                           ${serves.fat}\n`+
+      (serves.extras?`Extras / other:                  ${serves.extras} (limit discretionary foods)\n`:'')+
+      `\nEstimated from standard serves: ~${estKcal} kcal | ~${estProt}g protein\n`+
+      `Calculated requirements:        ${kcal>0?'~'+r0(kcal)+' kcal':'—'} | ${prot>0?'~'+r1(prot)+'g protein':'—'}\n`+
+      `Gap vs requirements:            ${kcalNote} | ${protNote}\n`+
+      (kcalGap!==null&&kcalGap>100?`⚠ Consider additional energy: fortification, extra serves, or oral supplement\n`:'')+
+      (protGap!==null&&protGap>2?`⚠ Consider additional protein: fortified foods or protein supplement\n`:'')+
+      (bfNote?`\n${bfNote}`:'');
+    } else if(serves===null&&note){
+      servesBlock=`\n\nRECOMMENDED DAILY SERVES\n${note}`;
+    }
+  }
+
+  if(kcal>0&&prot>0&&['adult-out','adult-hosp'].includes(S.type)){
+    // USDA exchange values
+    const VEG_KCAL=25,FRUIT_KCAL=60,DAIRY_KCAL=120,FAT_KCAL=45;
+    const STARCH_KCAL=80,STARCH_CARB=15,STARCH_PROT=2;
+    const LEAN_KCAL=45,LEAN_PROT=7;
+
+    // Fixed serves based on goals
+    const veg=5,fruit=2,dairy=2;
+    // Solve for fat last — start with 4 tsp as default
+    let fat=4;
+    const fixedKcal=veg*VEG_KCAL+fruit*FRUIT_KCAL+dairy*DAIRY_KCAL+fat*FAT_KCAL;
+    const fixedProt=veg*2+dairy*8;
+
+    // Remaining kcal and protein for starch + lean protein
+    let remKcal=kcal-fixedKcal;
+    const remProt=prot-fixedProt;
+
+    // Enforce minimum 2 FBDG protein serves = 5 USDA lean exchanges minimum
+    const MIN_LEAN=5;
+    // Solve starch serves from remaining kcal after guaranteeing min protein
+    // leanExch = max(MIN_LEAN, solve from protein equation)
+    // First try protein-driven: leanExch from protein need
+    let leanExch=Math.round(remProt/LEAN_PROT);
+    leanExch=Math.max(MIN_LEAN,leanExch);
+
+    // Starch serves from remaining kcal after protein
+    let starchServes=Math.round((remKcal-leanExch*LEAN_KCAL)/STARCH_KCAL);
+    starchServes=Math.max(3,Math.min(10,starchServes));
+
+    // Check total kcal and adjust fat to fill gap if needed
+    let totalKcal=starchServes*STARCH_KCAL+leanExch*LEAN_KCAL+veg*VEG_KCAL+fruit*FRUIT_KCAL+dairy*DAIRY_KCAL+fat*FAT_KCAL;
+    const kcalGap=kcal-totalKcal;
+    // Adjust fat serves to close gap (each tsp = 45 kcal)
+    if(Math.abs(kcalGap)>50){
+      const fatAdj=Math.round(kcalGap/FAT_KCAL);
+      fat=Math.max(2,Math.min(8,fat+fatAdj));
+      totalKcal=starchServes*STARCH_KCAL+leanExch*LEAN_KCAL+veg*VEG_KCAL+fruit*FRUIT_KCAL+dairy*DAIRY_KCAL+fat*FAT_KCAL;
+    }
+
+    // Convert lean USDA exchanges → Maldives FBDG protein serves (÷2.5, round to 0.5)
+    const fbdgProt=Math.round(leanExch/2.5*2)/2;
+
+    servesBlock=`\nRECOMMENDED DAILY SERVES — Food Based Dietary Guidelines for Maldivians\n`+
+    `Grains / cereals / starchy veg: ${starchServes} serves  (1 roshi, ½ cup rice, 1 slice bread, ½ cup potato/taro)\n`+
+    `Fish / meat / eggs / lentils:   ${fbdgProt} serves  (100g fish, 80g chicken, 2 eggs, 1 cup lentils/legumes)\n`+
+    `Vegetables:   ${veg} serves   (½ cup cooked / 1 cup raw)\n`+
+    `Fruit:  ${fruit} serves   (1 cup fresh / 1 medium)\n`+
+    `Milk / yoghurt /Cheese (reduced fat):   ${dairy} serves   (250ml milk / ¾ cup yoghurt)\n`+
+    `2 slices/ 40g cheese \n`+
+    `Oil:    ${fat} tsp\n`+
+    `Estimated total: ~${r0(totalKcal)} kcal`;
+  }
+
+  // Lean clinical-notes format for adult-hosp; rich format with Source for others
+  const out=S.type==='adult-hosp'
+    ?`NUTRITIONAL REQUIREMENTS\n${wtBlock}\n${energyLine}\n${protLine}\n${fluidLine}${servesBlock}`
+    :`NUTRITIONAL REQUIREMENTS\n${wtBlock}\n\n${energyLine}\n${protLine}\n${fluidLine}\n\nSource: ${src}${servesBlock}`;
+  document.getElementById('output-text').textContent=out;
+  document.getElementById('output-section').style.display='block';
+  document.getElementById('output-section').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function copyOutput(){const text=document.getElementById('output-text').textContent,btn=document.getElementById('copy-btn');if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>flash(btn)).catch(()=>fbCopy(text,btn));}else fbCopy(text,btn);}
+function fbCopy(text,btn){const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0;pointer-events:none;';document.body.appendChild(ta);if(navigator.userAgent.match(/ipad|iphone/i)){const r=document.createRange();r.selectNodeContents(ta);const s=window.getSelection();s.removeAllRanges();s.addRange(r);ta.setSelectionRange(0,999999);}else ta.select();try{document.execCommand('copy');flash(btn);}catch(e){btn.textContent='Long-press to copy';setTimeout(()=>btn.textContent='Copy',3000);}document.body.removeChild(ta);}
+function flash(btn){btn.textContent='✓ Copied';btn.classList.add('done');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('done');},2000);}
+
+function resetAll(){
+  clearAllErrors();
+  document.querySelectorAll('input[type=number],input[type=text]').forEach(i=>i.value='');
+  document.getElementById('sex').value='';
+  buildNemoOptions();updateCondSummary();
+  ['icu-aki','fluid-mod','wt-choice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.options[0].value;});
+  const nrEl=document.getElementById('fluid-nemo-rate');if(nrEl)nrEl.value='30-35';
+  S.sf=1.0;S.csf=1.0;S.pal=1.2;S.apal=1.2;S.hpal=1.2;S.pretEChoice=null;S.pretPChoice=null;S.hospEChoice=null;S.childProtMethod='nrv';S.picuPhase='acute';S.picuAcuteChoice='bmr';S.adultAgeGrp='under65';
+  setEnergyUnit('kcal');
+  setSF(1.0,true);setCSF(1.0,true);setChildProt('nrv');
+  document.getElementById('child-prot-method-field').style.display='none';
+  ['preterm-result','infant-result','child-result','aout-result','ahosp-result','aicu-result','picu-result','fluid-hs-result','fluid-hj-result','fluid-nemo-result','abw-result'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
+  ['preterm-e-choice-section','preterm-p-choice-section','hosp-e-choice-section','output-section'].forEach(id=>document.getElementById(id).style.display='none');
+  setType('infant');
+}
+</script>
+
+<div class="disclaimer" role="note">
+  <strong>⚠ Clinical Disclaimer</strong>
+  Clinical reference tool intended for use by qualified healthcare professionals only. Calculated values are estimates based on published guidelines and validated equations, and must always be interpreted in the context of a full clinical assessment. Results do not replace clinical judgement and should not be used as the sole basis for nutritional prescriptions. Always consider individual patient factors including clinical condition, biochemistry, and tolerance. Users are responsible for independent clinical verification of all values before application against their institution's protocols. The developer accepts no liability for clinical decisions made on the basis of this tool.
+</div>
+
+<script>
+// Register the service worker so the app works offline after first load.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function (err) {
+      console.warn('Service worker registration failed:', err);
+    });
+  });
+}
+</script>
+
+</body>
+</html>
