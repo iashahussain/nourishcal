@@ -1838,12 +1838,23 @@ function generateOutput(){
       const kcalNote=kcalGap!==null?(kcalGap>50?`↑ ${kcalGap} kcal above standard serves`:kcalGap<-50?`↓ ${Math.abs(kcalGap)} kcal below standard serves`:'✓ Within range'):'';
       const protNote=protGap!==null?(protGap>1?`↑ ${protGap}g above standard serves`:protGap<-1?`↓ ${Math.abs(protGap)}g below standard serves`:'✓ Within range'):'';
 
+      const portions = S.type==='infant'
+        ? {veg:'~20g · 1–2 tbsp cooked',
+           fruit:'~20g · 1–2 tbsp mashed/diced',
+           starch:'½ slice bread / ¼ cup cooked rice or pasta / 2–3 tbsp infant cereal',
+           prot:'~30g cooked meat/fish / 1 egg / ¼ cup legumes',
+           dairy:'100g yoghurt / 20g cheese — complementary to breast milk/formula'}
+        : {veg:'75g · ½ cup cooked / 1 cup salad',
+           fruit:'150g · 1 medium piece / 1 cup diced',
+           starch:'1 slice bread / ½ cup cooked rice or pasta / ⅔ cup cereal',
+           prot:'65g cooked meat / 80g poultry / 100g fish / 2 eggs / 1 cup legumes',
+           dairy:'250ml milk / 200g yoghurt / 40g (2 slices) cheese'};
       servesBlock=`\n\nRECOMMENDED DAILY SERVES — Australian Dietary Guidelines (${ageLabel})\n`+
-      `Vegetables:                     ${serves.veg} serves\n`+
-      `Fruit:                          ${serves.fruit} serves\n`+
-      `Grains / cereals / starchy veg: ${serves.starch} serves\n`+
-      `Fish / meat / eggs / lentils:   ${serves.prot} serves\n`+
-      `Milk / yoghurt / cheese:        ${serves.dairy} serves\n`+
+      `Vegetables:                     ${serves.veg} serves  (${portions.veg})\n`+
+      `Fruit:                          ${serves.fruit} serves  (${portions.fruit})\n`+
+      `Grains / cereals / starchy veg: ${serves.starch} serves  (${portions.starch})\n`+
+      `Fish / meat / eggs / lentils:   ${serves.prot} serves  (${portions.prot})\n`+
+      `Milk / yoghurt / cheese:        ${serves.dairy} serves  (${portions.dairy})\n`+
       `Oils:                           ${serves.fat}\n`+
       (serves.extras?`Extras / other:                  ${serves.extras} (limit discretionary foods)\n`:'')+
       `\nEstimated from standard serves: ~${estKcal} kcal | ~${estProt}g protein\n`+
