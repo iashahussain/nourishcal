@@ -2,15 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1a6b5c">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="NourishCal">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NourishCal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -806,7 +798,47 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
   <div class="ct">Adult ICU — NEMO / ESPEN / ASPEN</div>
   <div class="field"><label>ICU Phase</label><div class="tog-group" id="icu-phase-tog"><button class="tog active" onclick="setICUPhase('early')">Early phase (day 1–3)</button><button class="tog" onclick="setICUPhase('established')">Established critical illness</button></div></div>
   <div class="field"><label>AKI modifier</label><select id="icu-aki" onchange="recalc()"><option value="none">No AKI</option><option value="no-dialysis">AKI — no dialysis</option><option value="dialysis">AKI — on dialysis</option></select></div>
+  <div class="field"><label>Guideline to follow</label><div class="tog-group" id="icu-guideline-tog"><button class="tog active" onclick="setICUGuideline('both')">Show both</button><button class="tog" onclick="setICUGuideline('espen')">ESPEN</button><button class="tog" onclick="setICUGuideline('aspen')">ASPEN</button></div></div>
   <div id="aicu-result"></div>
+  <style>
+  #sec-adult-icu .icu-line{display:flex;align-items:baseline;gap:.5rem;margin:.35rem 0}
+  #sec-adult-icu .icu-line .src-tag{flex:none;margin-top:.15rem}
+  #sec-adult-icu .icu-fig{display:flex;flex-direction:column;line-height:1.25}
+  #sec-adult-icu .icu-val{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--accent2)}
+  #sec-adult-icu .icu-det{font-size:.68rem;color:var(--dim);margin-top:.05rem}
+  #sec-adult-icu .icu-ref{margin-top:.85rem;border:1px solid var(--border);border-radius:8px;background:var(--accent-light);overflow:hidden}
+  #sec-adult-icu .icu-ref>summary{cursor:pointer;padding:.6rem .85rem;font-size:.74rem;font-weight:600;color:var(--accent);list-style:none}
+  #sec-adult-icu .icu-ref>summary::-webkit-details-marker{display:none}
+  #sec-adult-icu .icu-ref>summary::before{content:'▸ ';font-size:.7rem}
+  #sec-adult-icu .icu-ref[open]>summary::before{content:'▾ '}
+  #sec-adult-icu .icu-ref[open]>summary{border-bottom:1px solid var(--border)}
+  #sec-adult-icu .icu-ref-body{padding:.7rem .85rem;font-size:.68rem;line-height:1.5}
+  #sec-adult-icu .icu-ref table{width:100%;border-collapse:collapse;margin-bottom:.6rem}
+  #sec-adult-icu .icu-ref th,#sec-adult-icu .icu-ref td{border:1px solid var(--border);padding:.35rem .45rem;text-align:left;vertical-align:top}
+  #sec-adult-icu .icu-ref th{background:var(--accent);color:#fff;font-size:.65rem;font-weight:600}
+  #sec-adult-icu .icu-ref-notes>div{margin-bottom:.3rem;color:var(--muted)}
+  </style>
+  <details class="icu-ref">
+    <summary>Quick reference — ICU energy &amp; protein (ESPEN vs ASPEN)</summary>
+    <div class="icu-ref-body">
+      <table>
+        <thead><tr><th>BMI</th><th>ESPEN — energy · protein · weight</th><th>ASPEN — energy · protein · weight</th></tr></thead>
+        <tbody>
+          <tr><td>&lt;25</td><td>25 kcal/kg · 1.3 g/kg · <strong>actual</strong></td><td>12–25 kcal/kg · 1.2–2.0 g/kg · <strong>actual</strong></td></tr>
+          <tr><td>25–30</td><td>20–25 kcal/kg × <strong>ideal BW</strong> · 1.3 g/kg × <strong>adj BW*</strong></td><td>12–25 kcal/kg · 1.2–2.0 g/kg · <strong>actual</strong></td></tr>
+          <tr><td>30–50</td><td>20–25 kcal/kg × <strong>ideal BW</strong> · 1.3 g/kg × <strong>adj BW*</strong></td><td>11–14 kcal/kg <strong>actual</strong> · ≥2.0 (30–40) / 2.0–2.5 (≥40) g/kg · <strong>IBW (Devine)</strong></td></tr>
+          <tr><td>&gt;50</td><td>20–25 kcal/kg × <strong>ideal BW</strong> · 1.3 g/kg × <strong>adj BW*</strong></td><td>22–25 kcal/kg · 2.0–2.5 g/kg · <strong>IBW (Devine)</strong></td></tr>
+        </tbody>
+      </table>
+      <div class="icu-ref-notes">
+        <div>Early phase (ESPEN): hypocaloric <strong>&lt;70%</strong> of target in week 1, ramp to 80–100% after day 3.</div>
+        <div>Above BMI 25 ESPEN corrects the reference weight: energy on <strong>ideal BW</strong> (BMI 25 = 25 × height²), protein on <strong>*adjusted BW</strong> = ideal BW + 0.25 × (actual − ideal BW).</div>
+        <div>⚑ <strong>Indirect calorimetry is the gold standard</strong> — weight-based targets are unreliable in obesity (measured needs can be ~2× the estimate; Schetz 2019, Intensive Care Med).</div>
+        <div>Hypocaloric high-protein evidence is low-quality (small/old RCTs). Obesity paradox: obese patients often survive better — avoid overfeeding.</div>
+        <div>No IBW formula is validated; ESPEN uses BMI-25-based adjusted weight, ASPEN's evidence base uses formula IBW (Devine here). AKI/CRRT: ESPEN ≤1.7, ASPEN up to 2.0–2.5 g/kg — weigh EFFORT-Protein (2023) caution.</div>
+      </div>
+    </div>
+  </details>
 </div>
 
 <div class="card section" id="sec-picu">
@@ -964,7 +996,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
 
 </div>
 <script>
-const S={type:'infant',route:'enteral',sf:1.0,csf:1.0,pal:1.2,palLabel:'Bed rest',apal:1.2,apalLabel:'Bed rest',aprot:0.8,aprotLabel:'WHO/FAO RDA',hpal:1.2,hpalLabel:'Bed rest',fluidMode:'hs',icuPhase:'early',picuPhase:'acute',picuAcuteChoice:'bmr',adultAgeGrp:'under65',energyUnit:'kcal',pretEChoice:null,pretPChoice:null,hospEChoice:null,childProtMethod:'nrv'};
+const S={type:'infant',route:'enteral',sf:1.0,csf:1.0,pal:1.2,palLabel:'Bed rest',apal:1.2,apalLabel:'Bed rest',aprot:0.8,aprotLabel:'WHO/FAO RDA',hpal:1.2,hpalLabel:'Bed rest',fluidMode:'hs',icuPhase:'early',icuGuideline:'both',picuPhase:'acute',picuAcuteChoice:'bmr',adultAgeGrp:'under65',energyUnit:'kcal',pretEChoice:null,pretPChoice:null,hospEChoice:null,childProtMethod:'nrv'};
 
 // --- Inline validation helpers ---
 function showFieldError(id,msg){const el=document.getElementById(id);if(!el)return;el.classList.add('has-error');el.setAttribute('aria-invalid','true');let err=document.getElementById(id+'-error');if(!err){err=document.createElement('div');err.id=id+'-error';err.className='field-error';err.setAttribute('role','alert');el.parentNode.insertBefore(err,el.nextSibling);}err.textContent=msg;}
@@ -1229,6 +1261,7 @@ function setAPAL(v,l){S.apal=v;S.apalLabel=l;document.querySelectorAll('#apal-gr
 function setAProt(v,l){S.aprot=v;S.aprotLabel=l;document.querySelectorAll('#aprot-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
 function setHPAL(v,l){S.hpal=v;S.hpalLabel=l;document.querySelectorAll('#hpal-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
 function setICUPhase(p){S.icuPhase=p;document.querySelectorAll('#icu-phase-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setICUPhase('${p}')`));recalc();}
+function setICUGuideline(g){S.icuGuideline=g;document.querySelectorAll('#icu-guideline-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setICUGuideline('${g}')`));recalc();}
 function setPICUPhase(p){S.picuPhase=p;document.querySelectorAll('#picu-phase-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setPICUPhase('${p}')`));recalc();}
 function setPicuAcuteChoice(c){S.picuAcuteChoice=c;recalc();}
 function setFluid(m){S.fluidMode=m;['hs','hj','nemo','doc'].forEach(x=>{document.getElementById('fl-'+x)?.classList.toggle('active',x===m);const s=document.getElementById('fluid-'+x+'-section');if(s)s.style.display=x===m?'block':'none';});recalc();}
@@ -1395,13 +1428,76 @@ function pickHospE(k){
   if(S.type==='adult-hosp')calcAdultHosp();
 }
 
-function calcAdultICU(){
-  const wkg=getWt(),el=document.getElementById('aicu-result');if(!wkg){el.innerHTML='';return;}
+// Flatten an ICU {val,det} figure into one string for the plain-text note.
+function icuFmt(o){return o.det?`${o.val} (${o.det})`:o.val;}
+// Devine ideal body weight (kg) — used ONLY for the ASPEN obese ICU pathway.
+function devineIBW(hCm,sex){
+  if(!hCm||!sex)return null;
+  const inch=hCm/2.54,base=sex==='M'?50:45.5;
+  return r1(base+2.3*(inch-60));
+}
+// Shared ICU model — drives both the live card and the generated note so they can't diverge.
+// Energy/protein are weight-based per-kg targets (indirect calorimetry is the gold standard).
+function icuModel(){
+  const actual=parseFloat(document.getElementById('weight').value);
+  const h=parseFloat(document.getElementById('height').value);
+  const sex=document.getElementById('sex').value;
   const phase=S.icuPhase,aki=document.getElementById('icu-aki').value;
-  const eL=phase==='early'?20:25,eH=phase==='early'?25:30;
-  const akiPL=aki==='no-dialysis'?1.0:aki==='dialysis'?1.3:1.2,akiPH=aki==='no-dialysis'?1.3:aki==='dialysis'?1.7:2.0;
-  el.innerHTML=`<div class="rg"><div class="rc"><div class="rl">Energy</div><div class="rv">${toE(r0(eL*wkg))}–${toE(r0(eH*wkg))}</div><div class="ru">${eUnit()}/day</div><div class="rs">${eL}–${eH} kcal/kg/day</div></div><div class="rc"><div class="rl">Protein</div><div class="rv">${r1(akiPL*wkg)}–${r1(akiPH*wkg)}</div><div class="ru">g/day</div><div class="rs">${akiPL}–${akiPH} g/kg${aki!=='none'?' (AKI)':''}</div></div><div class="rc"><div class="rl">Phase</div><div class="rv">${phase==='early'?'Early':'Established'}</div><div class="ru">${wkg}kg</div></div></div>
-  <div class="fb"><div style="color:var(--accent)">ICU ${phase==='early'?'early phase':'established'}:</div><div class="fl">${eL}–${eH} kcal/kg × ${wkg}kg = ${toE(r0(eL*wkg))}–${toE(r0(eH*wkg))} ${eUnit()}/day</div><div class="fl">${akiPL}–${akiPH} g/kg × ${wkg}kg = ${r1(akiPL*wkg)}–${r1(akiPH*wkg)} g/day${aki==='no-dialysis'?' (AKI no dialysis: 1.0–1.3)':aki==='dialysis'?' (AKI on dialysis: 1.3–1.7)':''}</div>${phase==='early'?'<div style="color:var(--warn)">⚠ Early phase: prefer below 70% estimated needs in first week (ESPEN 2019).</div>':''}<div class="fsrc">Estimating energy, protein & fluid requirements for adult clinical conditions | NEMO Nutrition Support Group | ESPEN ICU 2019 | ASPEN 2022</div></div>`;
+  const a=calcABW(),bmi=a?a.bmi:null,ibw25=a?a.ibw25:null,ibwD=devineIBW(h,sex);
+  const obese=bmi!==null&&bmi>=30,u=eUnit();
+  // ESPEN — above BMI 25 the reference weight is corrected: energy on IDEAL BW (BMI 25), protein on ADJUSTED BW (IBW + 0.25×excess)
+  const espCorrect=bmi!==null&&bmi>25&&ibw25!==null;
+  const adjBW=espCorrect?r1(ibw25+0.25*(actual-ibw25)):actual;
+  const espEnWt=espCorrect?ibw25:actual;
+  const espEnWtLbl=espCorrect?`${ibw25}kg ideal BW (BMI 25)`:`${actual}kg actual`;
+  const espPrWtLbl=espCorrect?`${adjBW}kg adjusted BW (IBW + 0.25×excess)`:`${actual}kg actual`;
+  let espEnergy;
+  if(espCorrect){
+    const eLo=r0(20*espEnWt),eHi=r0(25*espEnWt);
+    espEnergy=phase==='early'
+      ? {val:`${toE(r0(0.7*eLo))}–${toE(r0(0.7*eHi))} ${u}/day`,det:`wk 1 hypocaloric (70% of the 20–25 kcal/kg target); full target ${toE(eLo)}–${toE(eHi)} ${u}/day (× ${espEnWtLbl}); ramp after day 3`}
+      : {val:`${toE(eLo)}–${toE(eHi)} ${u}/day`,det:`20–25 kcal/kg × ${espEnWtLbl}`};
+  } else {
+    const tgt=r0(25*espEnWt),early=r0(0.7*25*espEnWt);
+    espEnergy=phase==='early'
+      ? {val:`≤${toE(early)} ${u}/day`,det:`wk 1 hypocaloric (<70% of 25 kcal/kg); full target ${toE(tgt)} ${u}/day × ${espEnWtLbl}; ramp after day 3`}
+      : {val:`${toE(tgt)} ${u}/day`,det:`25 kcal/kg × ${espEnWtLbl}`};
+  }
+  const espProt={val:`${r1(1.3*adjBW)} g/day`,det:`1.3 g/kg × ${espPrWtLbl}`};
+  // ASPEN 2022 (+ SCCM/ASPEN 2016 obesity) — Devine IBW for the obese pathway
+  let aspEnergy;
+  if(obese&&bmi<=50)aspEnergy={val:`${toE(r0(11*actual))}–${toE(r0(14*actual))} ${u}/day`,det:`obese BMI ${r1(bmi)}: 11–14 kcal/kg × ${actual}kg actual`};
+  else if(obese&&bmi>50)aspEnergy=ibwD?{val:`${toE(r0(22*ibwD))}–${toE(r0(25*ibwD))} ${u}/day`,det:`obese BMI ${r1(bmi)}: 22–25 kcal/kg × ${ibwD}kg IBW-Devine`}:{val:'—',det:'select sex to compute IBW-Devine'};
+  else aspEnergy={val:`${toE(r0(12*actual))}–${toE(r0(25*actual))} ${u}/day`,det:`12–25 kcal/kg × ${actual}kg actual, first 7–10 days`};
+  let aspProt;
+  if(obese)aspProt=ibwD?(bmi>=40?{val:`${r1(2.0*ibwD)}–${r1(2.5*ibwD)} g/day`,det:`obese BMI ${r1(bmi)}: 2.0–2.5 g/kg × ${ibwD}kg IBW-Devine`}:{val:`≥${r1(2.0*ibwD)} g/day`,det:`obese BMI ${r1(bmi)}: ≥2.0 g/kg × ${ibwD}kg IBW-Devine`}):{val:'—',det:'select sex to compute IBW-Devine'};
+  else aspProt={val:`${r1(1.2*actual)}–${r1(2.0*actual)} g/day`,det:`1.2–2.0 g/kg × ${actual}kg actual`};
+  let akiNote='';
+  if(aki==='no-dialysis')akiNote='AKI (no RRT): if non-catabolic, consider lower protein ~1.0 g/kg; do not restrict if catabolic.';
+  else if(aki==='dialysis')akiNote='On RRT/CRRT: amino-acid losses raise needs — ESPEN up to ~1.7 g/kg, ASPEN up to 2.0–2.5 g/kg; weigh against EFFORT-Protein (2023) caution in AKI.';
+  const obeseCaveat=obese?'⚑ Weight-based targets are unreliable in obesity (measured needs can be ~2× the estimate) — use indirect calorimetry where available. Hypocaloric high-protein rests on low-quality evidence; obese patients often survive better (obesity paradox) — avoid overfeeding.':'';
+  const heightNote=!h?'Enter height to enable BMI / obese pathway.':'';
+  const shortFlag=(h&&h<152&&obese)?`⚠ Height ${h}cm: Devine IBW is unreliable below ~152cm — verify clinically.`:'';
+  return {actual,h,sex,bmi,ibw25,ibwD,adjBW,obese,espCorrect,espEnWtLbl,espPrWtLbl,phase,aki,espEnergy,espProt,aspEnergy,aspProt,akiNote,obeseCaveat,heightNote,shortFlag};
+}
+function calcAdultICU(){
+  const el=document.getElementById('aicu-result');
+  const actual=parseFloat(document.getElementById('weight').value);if(!actual){el.innerHTML='';return;}
+  const m=icuModel(),fol=S.icuGuideline,dim=g=>(fol==='both'||fol===g)?'':'opacity:.45';
+  el.innerHTML=`<div class="fb">
+    <div style="color:var(--muted);font-size:.7rem;margin-bottom:.45rem">Weight basis: actual ${m.actual}kg${m.bmi!==null?` · BMI ${r1(m.bmi)}${m.obese?' (obese)':''}`:''}${m.espCorrect?` · ESPEN ideal BW ${m.ibw25}kg / adj BW ${m.adjBW}kg`:''}${m.obese&&m.ibwD?` · ASPEN Devine IBW ${m.ibwD}kg`:''} · indirect calorimetry preferred where available</div>
+    <div style="color:var(--accent);font-weight:600">Energy</div>
+    <div class="icu-line" style="${dim('espen')}"><span class="src-tag">ESPEN 2023</span><div class="icu-fig"><span class="icu-val">${m.espEnergy.val}</span><span class="icu-det">${m.espEnergy.det}</span></div></div>
+    <div class="icu-line" style="${dim('aspen')}"><span class="src-tag">ASPEN 2022</span><div class="icu-fig"><span class="icu-val">${m.aspEnergy.val}</span><span class="icu-det">${m.aspEnergy.det}</span></div></div>
+    <div style="color:var(--accent);font-weight:600;margin-top:.55rem">Protein</div>
+    <div class="icu-line" style="${dim('espen')}"><span class="src-tag">ESPEN 2023</span><div class="icu-fig"><span class="icu-val">${m.espProt.val}</span><span class="icu-det">${m.espProt.det}</span></div></div>
+    <div class="icu-line" style="${dim('aspen')}"><span class="src-tag">ASPEN 2022</span><div class="icu-fig"><span class="icu-val">${m.aspProt.val}</span><span class="icu-det">${m.aspProt.det}</span></div></div>
+    ${m.obeseCaveat?`<div class="fl" style="color:var(--warn)">${m.obeseCaveat}</div>`:''}
+    ${m.akiNote?`<div class="fl" style="color:var(--warn)">AKI: ${m.akiNote}</div>`:''}
+    ${m.heightNote?`<div class="fl" style="color:var(--dim)">${m.heightNote}</div>`:''}
+    ${m.shortFlag?`<div class="fl" style="color:var(--warn)">${m.shortFlag}</div>`:''}
+    <div class="fsrc">Following: ${fol==='espen'?'ESPEN 2023':fol==='aspen'?'ASPEN 2022':'both shown'} · NEMO | ESPEN ICU 2019 (rev 2023) | ASPEN 2022 | obesity SCCM/ASPEN 2016</div>
+  </div>`;
 }
 
 function calcPICU(){
@@ -1596,7 +1692,7 @@ function generateOutput(){
   const elderly=S.adultAgeGrp==='over65';
   const wtNote=wtChoice==='abw'?`${usedWt}kg (ABW)`:wtChoice==='ibw25'?`${usedWt}kg (IBW at BMI 25)`:wtChoice==='ibw30'&&elderly?`${usedWt}kg (IBW at BMI 30)`:`${usedWt}kg (actual)`;
   const ibwDisplay=elderly?`IBW(30) ${abw?.ibw30}kg`:`IBW(25) ${abw?.ibw25}kg`;
-  let energyLine='',protLine='',src='';
+  let energyLine='',protLine='',src='',icuM=null;
 
   if(S.type==='preterm'){
     const gaW=parseInt(document.getElementById('ga-weeks').value),wg=usedWt*1000,route=S.route;
@@ -1661,13 +1757,12 @@ function generateOutput(){
     src=`Estimating energy, protein & fluid requirements for adult clinical conditions | NEMO Nutrition Support Group | ${cond.src}`;
     if(cond.refeeding)protLine+='\n⚠ Refeeding risk: EN/PN commence at 50% targets — increase gradually';
   } else if(S.type==='adult-icu'){
-    const phase=S.icuPhase,aki=document.getElementById('icu-aki').value;
-    const eL=phase==='early'?20:25,eH=phase==='early'?25:30;
-    const akiPL=aki==='no-dialysis'?1.0:aki==='dialysis'?1.3:1.2,akiPH=aki==='no-dialysis'?1.3:aki==='dialysis'?1.7:2.0;
-    energyLine=`EER: ${toE(r0(eL*usedWt))}–${toE(r0(eH*usedWt))} ${eUnit()}/day (${eL}–${eH} kcal/kg/day — ICU ${phase==='early'?'early phase':'established'})`;
-    protLine=`EPR: ${r1(akiPL*usedWt)}–${r1(akiPH*usedWt)} g/day (${akiPL}–${akiPH} g/kg/day${aki!=='none'?' — AKI adjusted':''})`;
-    src='Estimating energy, protein & fluid requirements for adult clinical conditions | NEMO Nutrition Support Group | ESPEN ICU 2019 | ASPEN 2022';
-    if(phase==='early')protLine+='\n⚠ Early ICU: prefer <70% estimated needs in first week (ESPEN 2019)';
+    const m=icuModel();icuM=m;
+    const fol=S.icuGuideline;
+    const followLabel=fol==='espen'?'ESPEN 2023 (European)':fol==='aspen'?'ASPEN 2022 (American)':'both shown — select per unit protocol';
+    energyLine=`ENERGY — ICU (indirect calorimetry preferred where available)\n   Following: ${followLabel}\n   • ESPEN 2023:  ${icuFmt(m.espEnergy)}\n   • ASPEN 2022:  ${icuFmt(m.aspEnergy)}`;
+    protLine=`PROTEIN — ICU\n   • ESPEN 2023:  ${icuFmt(m.espProt)}\n   • ASPEN 2022:  ${icuFmt(m.aspProt)}`+(m.obeseCaveat?`\n   ${m.obeseCaveat}`:'')+(m.akiNote?`\n   AKI: ${m.akiNote}`:'')+(m.heightNote?`\n   ${m.heightNote}`:'')+(m.shortFlag?`\n   ${m.shortFlag}`:'');
+    src='NEMO Nutrition Support Group | ESPEN ICU 2019 (rev. 2023) | ASPEN 2022 (Compher) | obesity: SCCM/ASPEN 2016';
   } else if(S.type==='picu'){
     const phase=S.picuPhase;
     const ageRaw=parseFloat(document.getElementById('picu-age').value);
@@ -1730,7 +1825,10 @@ function generateOutput(){
   else if(S.fluidMode==='nemo'){const rateOpt=document.getElementById('fluid-nemo-rate').value;if(rateOpt==='30-35'){const lo=r0(30*usedWt),hi=r0(35*usedWt);let nemoB;if(actualWt<=60)nemoB='1.5–2L/day';else if(actualWt<=80)nemoB='2–2.5L/day';else nemoB='2.5–3L/day';fluidLine=`EFR: ${lo}–${hi} ml/day (30–35 ml/kg/day · NEMO band: ${nemoB})`;}else{const r=parseFloat(rateOpt);fluidLine=`EFR: ${r0(r*usedWt)} ml/day (${r} ml/kg/day)`;}}
   else{fluidLine=`EFR: ${document.getElementById('fluid-doc-text').value||'—'}`;}
 
-  const wtBlock=abw&&abw.bmi>25?`Weight: actual ${actualWt}kg | ${ibwDisplay} | ABW ${abw.abw}kg\nUsed for calculations: ${wtNote}`:`Weight used: ${wtNote}`;
+  let wtBlock=abw&&abw.bmi>25?`Weight: actual ${actualWt}kg | ${ibwDisplay} | ABW ${abw.abw}kg\nUsed for calculations: ${wtNote}`:`Weight used: ${wtNote}`;
+  if(S.type==='adult-icu'&&icuM){
+    wtBlock=`Weight basis (ICU): actual ${icuM.actual}kg${icuM.bmi!==null?` · BMI ${r1(icuM.bmi)}${icuM.obese?' (obese)':''}`:''}${icuM.obese&&icuM.ibwD?` · Devine IBW ${icuM.ibwD}kg`:''}\n${icuM.espCorrect?`ESPEN: energy on ideal BW ${icuM.ibw25}kg; protein on adjusted BW ${icuM.adjBW}kg (IBW + 0.25×excess). `:'ESPEN: actual weight. '}ASPEN obese pathway: Devine IBW. Indirect calorimetry preferred.`;
+  }
 
   // --- MALDIVES FBDG SERVES CALCULATION ---
   // Extract numeric energy and protein midpoints from calculated values
@@ -1941,7 +2039,8 @@ function resetAll(){
   buildNemoOptions();updateCondSummary();
   ['icu-aki','fluid-mod','wt-choice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.options[0].value;});
   const nrEl=document.getElementById('fluid-nemo-rate');if(nrEl)nrEl.value='30-35';
-  S.sf=1.0;S.csf=1.0;S.pal=1.2;S.apal=1.2;S.hpal=1.2;S.pretEChoice=null;S.pretPChoice=null;S.hospEChoice=null;S.childProtMethod='nrv';S.picuPhase='acute';S.picuAcuteChoice='bmr';S.adultAgeGrp='under65';
+  S.sf=1.0;S.csf=1.0;S.pal=1.2;S.apal=1.2;S.hpal=1.2;S.pretEChoice=null;S.pretPChoice=null;S.hospEChoice=null;S.childProtMethod='nrv';S.picuPhase='acute';S.picuAcuteChoice='bmr';S.adultAgeGrp='under65';S.icuGuideline='both';
+  document.querySelectorAll('#icu-guideline-tog .tog').forEach((b,i)=>b.classList.toggle('active',i===0));
   setEnergyUnit('kcal');
   setSF(1.0,true);setCSF(1.0,true);setChildProt('nrv');
   document.getElementById('child-prot-method-field').style.display='none';
@@ -1955,17 +2054,6 @@ function resetAll(){
   <strong>⚠ Clinical Disclaimer</strong>
   Clinical reference tool intended for use by qualified healthcare professionals only. Calculated values are estimates based on published guidelines and validated equations, and must always be interpreted in the context of a full clinical assessment. Results do not replace clinical judgement and should not be used as the sole basis for nutritional prescriptions. Always consider individual patient factors including clinical condition, biochemistry, and tolerance. Users are responsible for independent clinical verification of all values before application against their institution's protocols. The developer accepts no liability for clinical decisions made on the basis of this tool.
 </div>
-
-<script>
-// Register the service worker so the app works offline after first load.
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').catch(function (err) {
-      console.warn('Service worker registration failed:', err);
-    });
-  });
-}
-</script>
 
 </body>
 </html>
