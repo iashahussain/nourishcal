@@ -984,6 +984,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
   <div class="owrap">
     <div class="olabel">NUTRITIONAL REQUIREMENTS — ready to paste</div>
     <button class="cbtn" id="copy-btn" onclick="copyOutput()">Copy</button>
+    <button class="cbtn" id="send-dash-btn" onclick="sendToDashboard()" style="display:none;margin-left:6px;background:#1a6b5c;color:#fff">&rarr; Send to dashboard</button>
     <div class="otext" id="output-text"></div>
   </div>
 </div>
@@ -1681,6 +1682,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   updateCondSummary();
   updateSteps();
   updateRefTables();
+  applyDashboardContext();
 });
 
 function generateOutput(){
@@ -2024,11 +2026,36 @@ function generateOutput(){
     ?`NUTRITIONAL REQUIREMENTS\n${wtBlock}\n${energyLine}\n${protLine}\n${fluidLine}${servesBlock}`
     :`NUTRITIONAL REQUIREMENTS\n${wtBlock}\n\n${energyLine}\n${protLine}\n${fluidLine}\n\nSource: ${src}${servesBlock}`;
   document.getElementById('output-text').textContent=out;
+  window._ncResult={energyLine:energyLine,protLine:protLine,fluidLine:fluidLine,text:out};
   document.getElementById('output-section').style.display='block';
   document.getElementById('output-section').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function copyOutput(){const text=document.getElementById('output-text').textContent,btn=document.getElementById('copy-btn');if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>flash(btn)).catch(()=>fbCopy(text,btn));}else fbCopy(text,btn);}
+function applyDashboardContext(){
+  try{
+    var q=new URLSearchParams(location.search);
+    var grp=q.get('grp');
+    if(grp && typeof setType==='function') setType(grp);
+    var wt=q.get('wt'); if(wt && parseFloat(wt)>0){ var w=document.getElementById('weight'); if(w) w.value=wt; }
+    var sex=q.get('sex'); if(sex==='M'||sex==='F'){ var s=document.getElementById('sex'); if(s) s.value=sex; }
+    var agem=q.get('agem'); if(agem){ var im=document.getElementById('inf-months'); if(im) im.value=agem; if(typeof updateInfantStatus==='function'){try{updateInfantStatus();}catch(_){}} }
+    var agey=q.get('agey'); if(agey){ ['child-age','aout-age','ahosp-age'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=agey; }); }
+    if(typeof recalc==='function'){try{recalc();}catch(_){}}
+    var embedded=q.get('embed')==='1' || window.parent!==window || !!window.opener;
+    if(embedded){ var b=document.getElementById('send-dash-btn'); if(b) b.style.display='inline-block'; }
+  }catch(_){}
+}
+function sendToDashboard(){
+  var txt=(document.getElementById('output-text')||{}).textContent||'';
+  if(!txt.trim()){ alert('Generate the output first.'); return; }
+  var r=window._ncResult||{};
+  var pick=function(line){ if(!line) return ''; var p=String(line).split('='); return (p.length>1?p[p.length-1]:line).trim(); };
+  var msg={ type:'nourishcal-result', text:txt, eer:pick(r.energyLine), epr:pick(r.protLine), efr:pick(r.fluidLine) };
+  if(window.parent&&window.parent!==window) window.parent.postMessage(msg,'*');
+  if(window.opener) window.opener.postMessage(msg,'*');
+  var b=document.getElementById('send-dash-btn'); if(b){ b.textContent='Sent ✓'; setTimeout(function(){b.innerHTML='&rarr; Send to dashboard';},2000); }
+}
 function fbCopy(text,btn){const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0;pointer-events:none;';document.body.appendChild(ta);if(navigator.userAgent.match(/ipad|iphone/i)){const r=document.createRange();r.selectNodeContents(ta);const s=window.getSelection();s.removeAllRanges();s.addRange(r);ta.setSelectionRange(0,999999);}else ta.select();try{document.execCommand('copy');flash(btn);}catch(e){btn.textContent='Long-press to copy';setTimeout(()=>btn.textContent='Copy',3000);}document.body.removeChild(ta);}
 function flash(btn){btn.textContent='✓ Copied';btn.classList.add('done');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('done');},2000);}
 
