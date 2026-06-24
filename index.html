@@ -768,6 +768,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
   <div class="ct">Adult Outpatient — Schofield BMR × PAL</div>
   <div class="field"><label>Age (years)</label><input type="number" id="aout-age" placeholder="e.g. 35" min="18" max="100" oninput="recalc()"></div>
   <div class="field"><label>PAL — NHMRC 2006</label><div class="pal-grid" id="apal-grid"><div class="pal-opt active" onclick="setAPAL(1.2,'Bed rest')"><div class="pv">1.2</div><div class="pd">Bed rest</div></div><div class="pal-opt" onclick="setAPAL(1.4,'Very sedentary')"><div class="pv">1.4</div><div class="pd">Very sedentary</div></div><div class="pal-opt" onclick="setAPAL(1.6,'Light activity')"><div class="pv">1.6</div><div class="pd">Light activity</div></div><div class="pal-opt" onclick="setAPAL(1.8,'Moderate activity')"><div class="pv">1.8</div><div class="pd">Moderate activity</div></div><div class="pal-opt" onclick="setAPAL(2.0,'Heavy activity')"><div class="pv">2.0</div><div class="pd">Heavy activity</div></div><div class="pal-opt" onclick="setAPAL(2.2,'Vigorous')"><div class="pv">2.2</div><div class="pd">Vigorous</div></div></div></div>
+  <div class="field"><label>BMR adjustment</label><div class="tog-group" id="aout-sa-tog"><button class="tog active" onclick="setAoutSA(false)">Standard BMR</button><button class="tog" onclick="setAoutSA(true)">South Asian −10% (ICMR)</button></div></div>
   <div class="field">
     <label>Protein requirement</label>
     <div class="pal-grid" id="aprot-grid">
@@ -997,7 +998,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
 
 </div>
 <script>
-const S={type:'infant',route:'enteral',sf:1.0,csf:1.0,pal:1.2,palLabel:'Bed rest',apal:1.2,apalLabel:'Bed rest',aprot:0.8,aprotLabel:'WHO/FAO RDA',hpal:1.2,hpalLabel:'Bed rest',fluidMode:'hs',icuPhase:'early',icuGuideline:'both',picuPhase:'acute',picuAcuteChoice:'bmr',adultAgeGrp:'under65',energyUnit:'kcal',pretEChoice:null,pretPChoice:null,hospEChoice:null,childProtMethod:'nrv'};
+const S={type:'infant',route:'enteral',sf:1.0,csf:1.0,pal:1.2,palLabel:'Bed rest',apal:1.2,apalLabel:'Bed rest',aprot:0.8,aprotLabel:'WHO/FAO RDA',hpal:1.2,hpalLabel:'Bed rest',fluidMode:'hs',icuPhase:'early',icuGuideline:'both',aoutSA:false,picuPhase:'acute',picuAcuteChoice:'bmr',adultAgeGrp:'under65',energyUnit:'kcal',pretEChoice:null,pretPChoice:null,hospEChoice:null,childProtMethod:'nrv'};
 
 // --- Inline validation helpers ---
 function showFieldError(id,msg){const el=document.getElementById(id);if(!el)return;el.classList.add('has-error');el.setAttribute('aria-invalid','true');let err=document.getElementById(id+'-error');if(!err){err=document.createElement('div');err.id=id+'-error';err.className='field-error';err.setAttribute('role','alert');el.parentNode.insertBefore(err,el.nextSibling);}err.textContent=msg;}
@@ -1260,6 +1261,7 @@ function updateInfantStatus(){
 function setPAL(v,l){S.pal=v;S.palLabel=l;document.querySelectorAll('#pal-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
 function setAPAL(v,l){S.apal=v;S.apalLabel=l;document.querySelectorAll('#apal-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
 function setAProt(v,l){S.aprot=v;S.aprotLabel=l;document.querySelectorAll('#aprot-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
+function setAoutSA(on){S.aoutSA=on;document.querySelectorAll('#aout-sa-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setAoutSA(${on})`));recalc();}
 function setHPAL(v,l){S.hpal=v;S.hpalLabel=l;document.querySelectorAll('#hpal-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
 function setICUPhase(p){S.icuPhase=p;document.querySelectorAll('#icu-phase-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setICUPhase('${p}')`));recalc();}
 function setICUGuideline(g){S.icuGuideline=g;document.querySelectorAll('#icu-guideline-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setICUGuideline('${g}')`));recalc();}
@@ -1395,10 +1397,11 @@ function calcChild(){
 function calcAdultOut(){
   const wkg=getWt(),age=parseInt(document.getElementById('aout-age').value),sex=document.getElementById('sex').value,el=document.getElementById('aout-result');
   if(!wkg||!age||!sex){el.innerHTML=!sex&&wkg&&age?'<div class="wn">⚠ Please select sex.</div>':'';return;}
-  const bmr=r0(schofield(age,sex,wkg)),energy=r0(bmr*S.apal);
+  const saF=S.aoutSA?0.9:1,rawBmr=schofield(age,sex,wkg);
+  const bmr=r0(rawBmr*saF),energy=r0(rawBmr*saF*S.apal);
   const prot=r1(S.aprot*wkg),protGkg=S.aprot;
   el.innerHTML=`<div class="rg"><div class="rc"><div class="rl">BMR</div><div class="rv">${toE(bmr)}</div><div class="ru">${eUnit()}/day</div></div><div class="rc"><div class="rl">EER</div><div class="rv">${toE(energy)}</div><div class="ru">${eUnit()}/day</div><div class="rs">PAL ${S.apal} (${S.apalLabel})</div></div><div class="rc"><div class="rl">Protein (EPR)</div><div class="rv">${prot}</div><div class="ru">g/day</div><div class="rs">${protGkg} g/kg/day</div></div><div class="rc"><div class="rl">Wt used</div><div class="rv">${wkg}kg</div><div class="ru">${agGrp(age)} · ${sex}</div></div></div>
-  <div class="fb"><div style="color:var(--accent)">Schofield (${agGrp(age)}, ${sex==='M'?'Male':'Female'}):</div><div class="fl">BMR = ${schEq(age,sex)} = ${toE(bmr)} ${eUnit()}/day</div><div>EER = ${toE(bmr)} × ${S.apal} (${S.apalLabel}) = ${toE(energy)} ${eUnit()}/day</div><div style="margin-top:.5rem;color:var(--accent)">Protein (${S.aprotLabel}):</div><div class="fl">EPR = ${protGkg} g/kg/day × ${wkg}kg = ${prot} g/day</div><div class="fsrc">Schofield 1985 | NHMRC PAL 2006 | ${S.aprotLabel}</div></div>`;
+  <div class="fb"><div style="color:var(--accent)">Schofield (${agGrp(age)}, ${sex==='M'?'Male':'Female'}):</div><div class="fl">BMR = ${schEq(age,sex)}${S.aoutSA?` = ${toE(r0(rawBmr))} × 0.90 (South Asian, ICMR −10%)`:''} = ${toE(bmr)} ${eUnit()}/day</div><div>EER = ${toE(bmr)} × ${S.apal} (${S.apalLabel}) = ${toE(energy)} ${eUnit()}/day</div><div style="margin-top:.5rem;color:var(--accent)">Protein (${S.aprotLabel}):</div><div class="fl">EPR = ${protGkg} g/kg/day × ${wkg}kg = ${prot} g/day</div><div class="fsrc">Schofield 1985 | NHMRC PAL 2006 | ${S.aprotLabel}${S.aoutSA?' | ICMR-NIN 2020 (−10% BMR)':''}</div></div>`;
 }
 
 function calcAdultHosp(){
@@ -1741,7 +1744,8 @@ function generateOutput(){
     if(!age){showFieldError('aout-age','Please enter age in years.');_e=true;}
     if(!sex){showFieldError('sex','Please select sex (in Patient Details above).');_e=true;}
     if(_e){focusFirstError();return;}
-    energyLine=`EER: ${toE(r0(schofield(age,sex,usedWt)*S.apal))} ${eUnit()}/day (Schofield BMR × PAL ${S.apal} — ${S.apalLabel})`;
+    const saF=S.aoutSA?0.9:1,saLbl=S.aoutSA?' × 0.90 (South Asian, ICMR −10%)':'';
+    energyLine=`EER: ${toE(r0(schofield(age,sex,usedWt)*saF*S.apal))} ${eUnit()}/day (Schofield BMR${saLbl} × PAL ${S.apal} — ${S.apalLabel})`;
     protLine=`EPR: ${r1(S.aprot*usedWt)} g/day (${S.aprot} g/kg/day — ${S.aprotLabel})`;src='Schofield 1985 | NHMRC PAL 2006';
   } else if(S.type==='adult-hosp'){
     const condKey=document.getElementById('nemo-condition').value;
@@ -2066,8 +2070,9 @@ function resetAll(){
   buildNemoOptions();updateCondSummary();
   ['icu-aki','fluid-mod','wt-choice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.options[0].value;});
   const nrEl=document.getElementById('fluid-nemo-rate');if(nrEl)nrEl.value='30-35';
-  S.sf=1.0;S.csf=1.0;S.pal=1.2;S.apal=1.2;S.hpal=1.2;S.pretEChoice=null;S.pretPChoice=null;S.hospEChoice=null;S.childProtMethod='nrv';S.picuPhase='acute';S.picuAcuteChoice='bmr';S.adultAgeGrp='under65';S.icuGuideline='both';
+  S.sf=1.0;S.csf=1.0;S.pal=1.2;S.apal=1.2;S.hpal=1.2;S.pretEChoice=null;S.pretPChoice=null;S.hospEChoice=null;S.childProtMethod='nrv';S.picuPhase='acute';S.picuAcuteChoice='bmr';S.adultAgeGrp='under65';S.icuGuideline='both';S.aoutSA=false;
   document.querySelectorAll('#icu-guideline-tog .tog').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('#aout-sa-tog .tog').forEach((b,i)=>b.classList.toggle('active',i===0));
   setEnergyUnit('kcal');
   setSF(1.0,true);setCSF(1.0,true);setChildProt('nrv');
   document.getElementById('child-prot-method-field').style.display='none';
