@@ -687,7 +687,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
   <div class="field" id="child-sf-field" style="display:none">
     <label>Stress Factor <span style="font-size:.65rem;color:var(--dim)">(energy only — for hospitalised/increased requirements)</span></label>
     <div class="sf-group"><button class="sf active" id="csf-1" onclick="setCSF(1.0)">None ×1.0</button><button class="sf" id="csf-12" onclick="setCSF(1.2)">×1.2</button><button class="sf" id="csf-13" onclick="setCSF(1.3)">×1.3</button></div>
-    <div class="hint">Apply only if evidence of hypermetabolism. Protein is not adjusted by stress factor.</div>
+    <div class="hint">Apply only if evidence of hypermetabolism. Protein is not adjusted. PAL is set to bed-rest when a stress factor is used — raise it only if the child is also active (avoids double-counting).</div>
   </div>
   <div class="field" id="child-prot-method-field" style="display:none">
     <label>Protein method (healthy only)</label>
@@ -697,7 +697,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
     </div>
     <div class="hint">Australian NRV: age/sex specific RDA · 1 g/kg: practical clinical target for healthy children</div>
   </div>
-  <div class="field"><label>PAL — NHMRC 2006</label><div class="pal-grid" id="pal-grid"><div class="pal-opt active" onclick="setPAL(1.2,'Bed rest')"><div class="pv">1.2</div><div class="pd">Bed rest</div></div><div class="pal-opt" onclick="setPAL(1.4,'Very sedentary')"><div class="pv">1.4</div><div class="pd">Very sedentary</div></div><div class="pal-opt" onclick="setPAL(1.6,'Light activity')"><div class="pv">1.6</div><div class="pd">Light activity</div></div><div class="pal-opt" onclick="setPAL(1.8,'Moderate activity')"><div class="pv">1.8</div><div class="pd">Moderate activity</div></div><div class="pal-opt" onclick="setPAL(2.0,'Heavy activity')"><div class="pv">2.0</div><div class="pd">Heavy activity</div></div><div class="pal-opt" onclick="setPAL(2.2,'Vigorous')"><div class="pv">2.2</div><div class="pd">Vigorous</div></div></div></div>
+  <div class="field"><label>PAL — NHMRC 2006</label><div class="pal-grid" id="pal-grid"><div class="pal-opt" onclick="setPAL(1.2,'Bed rest')"><div class="pv">1.2</div><div class="pd">Bed rest</div></div><div class="pal-opt" onclick="setPAL(1.4,'Very sedentary')"><div class="pv">1.4</div><div class="pd">Very sedentary</div></div><div class="pal-opt active" onclick="setPAL(1.6,'Light activity')"><div class="pv">1.6</div><div class="pd">Light activity</div></div><div class="pal-opt" onclick="setPAL(1.8,'Moderate activity')"><div class="pv">1.8</div><div class="pd">Moderate activity</div></div><div class="pal-opt" onclick="setPAL(2.0,'Heavy activity')"><div class="pv">2.0</div><div class="pd">Heavy activity</div></div><div class="pal-opt" onclick="setPAL(2.2,'Vigorous')"><div class="pv">2.2</div><div class="pd">Vigorous</div></div></div></div>
   <div id="child-result"></div>
 
   <!-- Child >3y reference table -->
@@ -1022,7 +1022,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
 
 </div>
 <script>
-const S={type:'infant',route:'enteral',sf:1.0,csf:1.0,pal:1.2,palLabel:'Bed rest',apal:1.2,apalLabel:'Bed rest',aprot:0.8,aprotLabel:'WHO/FAO RDA',hpal:1.2,hpalLabel:'Bed rest',fluidMode:'hs',icuPhase:'early',icuGuideline:'both',aoutSA:false,icuRenal:'none',picuPhase:'acute',picuAcuteChoice:'bmr',adultAgeGrp:'under65',energyUnit:'kcal',pretEChoice:null,pretPChoice:null,hospEChoice:null,childProtMethod:'nrv'};
+const S={type:'infant',route:'enteral',sf:1.0,csf:1.0,pal:1.6,palLabel:'Light activity',apal:1.2,apalLabel:'Bed rest',aprot:0.8,aprotLabel:'WHO/FAO RDA',hpal:1.2,hpalLabel:'Bed rest',fluidMode:'hs',icuPhase:'early',icuGuideline:'both',aoutSA:false,icuRenal:'none',picuPhase:'acute',picuAcuteChoice:'bmr',adultAgeGrp:'under65',energyUnit:'kcal',pretEChoice:null,pretPChoice:null,hospEChoice:null,childProtMethod:'nrv'};
 
 // --- Inline validation helpers ---
 function showFieldError(id,msg){const el=document.getElementById(id);if(!el)return;el.classList.add('has-error');el.setAttribute('aria-invalid','true');let err=document.getElementById(id+'-error');if(!err){err=document.createElement('div');err.id=id+'-error';err.className='field-error';err.setAttribute('role','alert');el.parentNode.insertBefore(err,el.nextSibling);}err.textContent=msg;}
@@ -1273,7 +1273,9 @@ function updateChildSF(){
   const f=document.getElementById('child-sf-field');
   if(f){
     f.style.display=status==='ill'?'block':'none';
-    if(status==='healthy'){setCSF(1.0,true);}
+    // Healthy child → default to Light activity (1.6); hospitalised → bed-rest PAL so the stress factor isn't stacked on an activity PAL
+    if(status==='healthy'){setCSF(1.0,true);setPAL(1.6,'Light activity');}
+    else{setPAL(1.2,'Bed rest');}
   }
 }
 function updateInfantStatus(){
@@ -1420,8 +1422,9 @@ function calcChild(){
   else{const lo=1.5,hi=age<=13?2:1.5;protGkg=`${lo}–${hi}`;protLabel='Increased requirements / Catch-up growth';protStr=`${r1(lo*wkg)}–${r1(hi*wkg)}g/day`;protMid=(lo+hi)/2*wkg;protSource='ASPEN';}
   const pct=pctEP(energyKcal,protMid);
   const pctWarn=status!=='healthy'&&pct<9?`<div class="wn">⚠ % energy from protein: ${pct}% — below WHO minimum of 9%.</div>`:'';
+  const dcWarn=(status==='ill'&&S.pal>=1.6&&S.csf>1.0)?`<div class="wn">⚠ Both an activity PAL (×${S.pal}) and a stress factor (×${S.csf}) are applied — this may double-count energy. For hospitalised children use bed-rest PAL (1.2) with a stress factor, or a higher PAL without one.</div>`:'';
   el.innerHTML=`<div class="rg"><div class="rc"><div class="rl">BMR</div><div class="rv">${toE(bmr)}</div><div class="ru">${eUnit()}/day</div></div><div class="rc"><div class="rl">Energy (EER)</div><div class="rv">${energy}</div><div class="ru">${eUnit()}/day</div><div class="rs">PAL ${S.pal} (${S.palLabel})</div></div><div class="rc ${status!=='healthy'&&pct<9?'warn':''}"><div class="rl">% E from protein</div><div class="rv ${status!=='healthy'&&pct<9?'warn':''}">${pct}%</div><div class="ru">WHO min 9–12%</div></div></div><div class="rg2" style="margin-top:.75rem"><div class="rc"><div class="rl">Protein</div><div class="rv">${protStr}</div><div class="ru">${protGkg} g/kg/day</div></div><div class="rc"><div class="rl">Wt used</div><div class="rv">${wkg}kg</div><div class="ru">${agGrp(age)} · ${sex}</div></div></div>
-  <div class="fb"><div style="color:var(--accent)">Schofield (${agGrp(age)}, ${sex==='M'?'Male':'Female'}):</div><div class="fl">BMR = ${schEq(age,sex)} = ${toE(bmr)} ${eUnit()}/day</div><div>EER = ${toE(bmr)} × ${S.pal} (${S.palLabel}) = ${toE(tee)} ${eUnit()}/day${sfStr}</div><div style="margin-top:.5rem;color:var(--accent)">Protein — ${protSource}:</div><div class="fl">${protLabel}: ${protGkg} g/kg/day × ${wkg}kg = ${protStr}</div><div class="fl">% E from protein = ${pct}%</div><div class="fsrc">Schofield 1985 | NHMRC PAL 2006 | ${protSource}</div></div>${pctWarn}`;
+  <div class="fb"><div style="color:var(--accent)">Schofield (${agGrp(age)}, ${sex==='M'?'Male':'Female'}):</div><div class="fl">BMR = ${schEq(age,sex)} = ${toE(bmr)} ${eUnit()}/day</div><div>EER = ${toE(bmr)} × ${S.pal} (${S.palLabel}) = ${toE(tee)} ${eUnit()}/day${sfStr}</div><div style="margin-top:.5rem;color:var(--accent)">Protein — ${protSource}:</div><div class="fl">${protLabel}: ${protGkg} g/kg/day × ${wkg}kg = ${protStr}</div><div class="fl">% E from protein = ${pct}%</div><div class="fsrc">Schofield 1985 | NHMRC PAL 2006 | ${protSource}</div></div>${pctWarn}${dcWarn}`;
 }
 
 function calcAdultOut(){
@@ -1769,6 +1772,7 @@ function generateOutput(){
     if(_e){focusFirstError();return;}
     const energyKcal=r0(r0(schofield(age,sex,usedWt)*S.pal)*S.csf),sfStr=S.csf>1?` × ${S.csf} stress`:'';
     energyLine=`EER: ${toE(energyKcal)} ${eUnit()}/day (Schofield BMR × PAL ${S.pal}${sfStr})`;
+    if(status==='ill'&&S.pal>=1.6&&S.csf>1.0)energyLine+='\n⚠ Both an activity PAL and a stress factor applied — may double-count; use bed-rest PAL with the stress factor, or a higher PAL without it.';
     if(status==='healthy'){
       let gkg,label;
       if(S.childProtMethod==='1gkg'){gkg=1.0;label='1 g/kg/day clinical target';}
@@ -2088,10 +2092,11 @@ function resetAll(){
   buildNemoOptions();updateCondSummary();
   ['fluid-mod','wt-choice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.options[0].value;});
   const nrEl=document.getElementById('fluid-nemo-rate');if(nrEl)nrEl.value='30-35';
-  S.sf=1.0;S.csf=1.0;S.pal=1.2;S.apal=1.2;S.hpal=1.2;S.pretEChoice=null;S.pretPChoice=null;S.hospEChoice=null;S.childProtMethod='nrv';S.picuPhase='acute';S.picuAcuteChoice='bmr';S.adultAgeGrp='under65';S.icuGuideline='both';S.aoutSA=false;S.icuRenal='none';
+  S.sf=1.0;S.csf=1.0;S.pal=1.6;S.palLabel='Light activity';S.apal=1.2;S.hpal=1.2;S.pretEChoice=null;S.pretPChoice=null;S.hospEChoice=null;S.childProtMethod='nrv';S.picuPhase='acute';S.picuAcuteChoice='bmr';S.adultAgeGrp='under65';S.icuGuideline='both';S.aoutSA=false;S.icuRenal='none';
   document.querySelectorAll('#icu-guideline-tog .tog').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('#aout-sa-tog .tog').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('#icu-renal-tog .tog').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('#pal-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent==='1.6'));
   setEnergyUnit('kcal');
   setSF(1.0,true);setCSF(1.0,true);setChildProt('nrv');
   document.getElementById('child-prot-method-field').style.display='none';
