@@ -3,7 +3,7 @@
 // fall back to network for everything else (e.g. Google Fonts).
 // Bump CACHE_VERSION whenever you change index.html or icons.
 
-const CACHE_VERSION = 'nourishcal-v0.6.2';
+const CACHE_VERSION = 'nourishcal-v0.6.3';
 const APP_SHELL = [
   './',
   './index.html',

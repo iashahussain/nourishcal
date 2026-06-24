@@ -2028,7 +2028,7 @@ function generateOutput(){
     const protFoods=Math.max(1,Math.round((prot-protOther)/17.5*2)/2);
     const protDelivered=r0(protOther+protFoods*17.5);
     // Approx energy from the food-group serves (kcal/serve); the balance to EER is the discretionary/extras allowance
-    const KC={grain:110,prot:140,veg:35,fruit:75,dairy:130};
+    const KC={grain:100,prot:150,veg:35,fruit:75,dairy:130};
     const foodKcal=r0(grains*KC.grain+protFoods*KC.prot+veg*KC.veg+fruit*KC.fruit+dairy*KC.dairy+oilsG*9);
     const extras=Math.max(0,r0(kcal-foodKcal));
 
