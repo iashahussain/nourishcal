@@ -2027,6 +2027,10 @@ function generateOutput(){
     const protOther=grains*2+dairy*8+veg*1;
     const protFoods=Math.max(1,Math.round((prot-protOther)/17.5*2)/2);
     const protDelivered=r0(protOther+protFoods*17.5);
+    // Approx energy from the food-group serves (kcal/serve); the balance to EER is the discretionary/extras allowance
+    const KC={grain:110,prot:140,veg:35,fruit:75,dairy:130};
+    const foodKcal=r0(grains*KC.grain+protFoods*KC.prot+veg*KC.veg+fruit*KC.fruit+dairy*KC.dairy+oilsG*9);
+    const extras=Math.max(0,r0(kcal-foodKcal));
 
     servesBlock=`\nRECOMMENDED DAILY SERVES — Maldives FBDG + USDA energy pattern (~${near[0]} kcal level)\n`+
     `Grains / cereals / starchy veg: ${grains} serves  (1 roshi, ½ cup rice, 1 slice bread, ½ cup potato/taro)\n`+
@@ -2035,7 +2039,7 @@ function generateOutput(){
     `Fruit:  ${fruit} serves   (1 cup fresh / 1 medium · FBDG 2–3)\n`+
     `Milk / yoghurt / cheese (reduced fat):   ${dairy} serves   (250ml milk / ¾ cup yoghurt / 40g cheese)\n`+
     `Oil:    ${oilTsp} tsp  (~${oilsG}g)\n`+
-    `Energy from this plan: ~${near[0]} kcal  (target ~${r0(kcal)} kcal)\n`+
+    `Energy: food groups ~${foodKcal} kcal + ~${extras} kcal for extras / discretionary  (target ~${r0(kcal)} kcal)\n`+
     `Protein from this plan: ~${protDelivered}g  (target ~${r0(prot)}g)`;
   }
 
