@@ -803,7 +803,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
 <div class="card section" id="sec-adult-icu">
   <div class="ct">Adult ICU — NEMO / ESPEN / ASPEN</div>
   <div class="field"><label>ICU Phase</label><div class="tog-group" id="icu-phase-tog"><button class="tog active" onclick="setICUPhase('early')">Early phase (day 1–3)</button><button class="tog" onclick="setICUPhase('established')">Established critical illness</button></div></div>
-  <div class="field"><label>Renal status (AKI / CKD)</label><select id="icu-aki" onchange="recalc()"><option value="none">None</option><option value="no-krt">AKI / AKI-on-CKD / CKD — not on KRT</option><option value="int-krt">On intermittent KRT (HD)</option><option value="cont-krt">On continuous / prolonged KRT (CKRT/PIKRT)</option></select></div>
+  <div class="field"><label>Renal status (AKI / CKD)</label><div class="tog-group" id="icu-renal-tog" style="flex-wrap:wrap"><button class="tog active" onclick="setICURenal('none')">None</button><button class="tog" onclick="setICURenal('no-krt')">AKI/CKD · no KRT</button><button class="tog" onclick="setICURenal('int-krt')">Intermittent KRT</button><button class="tog" onclick="setICURenal('cont-krt')">Continuous KRT</button></div><div class="hint" style="margin-top:.3rem">Groups AKI, AKI-on-CKD and CKD; sets the ESPEN renal protein target.</div></div>
   <div class="field"><label>Guideline to follow</label><div class="tog-group" id="icu-guideline-tog"><button class="tog active" onclick="setICUGuideline('both')">Show both</button><button class="tog" onclick="setICUGuideline('espen')">ESPEN</button><button class="tog" onclick="setICUGuideline('aspen')">ASPEN</button></div></div>
   <div id="aicu-result"></div>
   <style>
@@ -860,6 +860,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
         <div><strong>Weights:</strong> ideal BW = weight at BMI 25 (25 × height²); adjusted BW = ideal BW + ¼ of the excess weight; IBW-Devine = 50 (men)/45.5 (women) kg + 2.3 kg for each inch above 5 ft.</div>
         <div><strong>Kidney injury (AKI / CKD):</strong> energy is the same as any ICU patient — only protein changes with dialysis. Pick the renal status above (targets from the ESPEN renal guideline): not on KRT 1.0→1.3 · intermittent KRT 1.3–1.5 · continuous/prolonged KRT 1.5–1.7 (up to 2.0) g/kg. Never cut protein just to delay starting dialysis.</div>
         <div><strong>Obesity:</strong> feed cautiously — higher protein hasn't been shown to help, and obese patients often do better, so avoid overfeeding.</div>
+        <div style="margin-top:.45rem;font-size:.62rem;color:var(--dim);border-top:1px dashed var(--border);padding-top:.4rem"><strong>References:</strong> ESPEN ICU — Singer P et al. <em>Clin Nutr</em> 2019;38:48–79 (practical rev. 2023). ASPEN — Compher C et al. <em>JPEN</em> 2022;46:12–41; McClave SA et al. <em>JPEN</em> 2016;40:159–211 (obesity targets). ESPEN renal (AKI/CKD) — Fiaccadori E et al. <em>Clin Nutr</em> 2021;40:1644–68. Obesity in critical illness — Schetz M et al. <em>Intensive Care Med</em> 2019;45:757–69. BMR: Schofield <em>Hum Nutr Clin Nutr</em> 1985 / Henry <em>Public Health Nutr</em> 2005.</div>
       </div>
     </div>
   </details>
@@ -1021,7 +1022,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
 
 </div>
 <script>
-const S={type:'infant',route:'enteral',sf:1.0,csf:1.0,pal:1.2,palLabel:'Bed rest',apal:1.2,apalLabel:'Bed rest',aprot:0.8,aprotLabel:'WHO/FAO RDA',hpal:1.2,hpalLabel:'Bed rest',fluidMode:'hs',icuPhase:'early',icuGuideline:'both',aoutSA:false,picuPhase:'acute',picuAcuteChoice:'bmr',adultAgeGrp:'under65',energyUnit:'kcal',pretEChoice:null,pretPChoice:null,hospEChoice:null,childProtMethod:'nrv'};
+const S={type:'infant',route:'enteral',sf:1.0,csf:1.0,pal:1.2,palLabel:'Bed rest',apal:1.2,apalLabel:'Bed rest',aprot:0.8,aprotLabel:'WHO/FAO RDA',hpal:1.2,hpalLabel:'Bed rest',fluidMode:'hs',icuPhase:'early',icuGuideline:'both',aoutSA:false,icuRenal:'none',picuPhase:'acute',picuAcuteChoice:'bmr',adultAgeGrp:'under65',energyUnit:'kcal',pretEChoice:null,pretPChoice:null,hospEChoice:null,childProtMethod:'nrv'};
 
 // --- Inline validation helpers ---
 function showFieldError(id,msg){const el=document.getElementById(id);if(!el)return;el.classList.add('has-error');el.setAttribute('aria-invalid','true');let err=document.getElementById(id+'-error');if(!err){err=document.createElement('div');err.id=id+'-error';err.className='field-error';err.setAttribute('role','alert');el.parentNode.insertBefore(err,el.nextSibling);}err.textContent=msg;}
@@ -1293,6 +1294,7 @@ function setAoutSA(on){S.aoutSA=on;document.querySelectorAll('#aout-sa-tog .tog'
 function setHPAL(v,l){S.hpal=v;S.hpalLabel=l;document.querySelectorAll('#hpal-grid .pal-opt').forEach(el=>el.classList.toggle('active',el.querySelector('.pv').textContent===String(v)));recalc();}
 function setICUPhase(p){S.icuPhase=p;document.querySelectorAll('#icu-phase-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setICUPhase('${p}')`));recalc();}
 function setICUGuideline(g){S.icuGuideline=g;document.querySelectorAll('#icu-guideline-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setICUGuideline('${g}')`));recalc();}
+function setICURenal(v){S.icuRenal=v;document.querySelectorAll('#icu-renal-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setICURenal('${v}')`));recalc();}
 function setPICUPhase(p){S.picuPhase=p;document.querySelectorAll('#picu-phase-tog .tog').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')===`setPICUPhase('${p}')`));recalc();}
 function setPicuAcuteChoice(c){S.picuAcuteChoice=c;recalc();}
 function setFluid(m){S.fluidMode=m;['hs','hj','nemo','doc'].forEach(x=>{document.getElementById('fl-'+x)?.classList.toggle('active',x===m);const s=document.getElementById('fluid-'+x+'-section');if(s)s.style.display=x===m?'block':'none';});recalc();}
@@ -1474,7 +1476,7 @@ function icuModel(){
   const actual=parseFloat(document.getElementById('weight').value);
   const h=parseFloat(document.getElementById('height').value);
   const sex=document.getElementById('sex').value;
-  const phase=S.icuPhase,aki=document.getElementById('icu-aki').value;
+  const phase=S.icuPhase,aki=S.icuRenal;
   const a=calcABW(),bmi=a?a.bmi:null,ibw25=a?a.ibw25:null,ibwD=devineIBW(h,sex);
   const obese=bmi!==null&&bmi>=30,u=eUnit();
   // ESPEN — above BMI 25 the reference weight is corrected: energy on IDEAL BW (BMI 25), protein on ADJUSTED BW (IBW + 0.25×excess)
@@ -1782,7 +1784,7 @@ function generateOutput(){
     if(!sex){showFieldError('sex','Please select sex (in Patient Details above).');_e=true;}
     if(_e){focusFirstError();return;}
     const saF=S.aoutSA?0.9:1,saTxt=S.aoutSA?' × 0.9':'';
-    energyLine=`EER: ${toE(r0(schofield(age,sex,usedWt)*saF*S.apal))} ${eUnit()}/day (BMR${saTxt} × ${S.apal})`;
+    energyLine=`EER: ${toE(r0(schofield(age,sex,usedWt)*saF*S.apal))} ${eUnit()}/day (BMR ${toE(r0(schofield(age,sex,usedWt)))}${saTxt} × ${S.apal})`;
     protLine=`EPR: ${r1(S.aprot*usedWt)} g/day (${S.aprot} g/kg)`;src='';
   } else if(S.type==='adult-hosp'){
     const condKey=document.getElementById('nemo-condition').value;
@@ -2107,11 +2109,12 @@ function resetAll(){
   document.querySelectorAll('input[type=number],input[type=text]').forEach(i=>i.value='');
   document.getElementById('sex').value='';
   buildNemoOptions();updateCondSummary();
-  ['icu-aki','fluid-mod','wt-choice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.options[0].value;});
+  ['fluid-mod','wt-choice'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.options[0].value;});
   const nrEl=document.getElementById('fluid-nemo-rate');if(nrEl)nrEl.value='30-35';
-  S.sf=1.0;S.csf=1.0;S.pal=1.2;S.apal=1.2;S.hpal=1.2;S.pretEChoice=null;S.pretPChoice=null;S.hospEChoice=null;S.childProtMethod='nrv';S.picuPhase='acute';S.picuAcuteChoice='bmr';S.adultAgeGrp='under65';S.icuGuideline='both';S.aoutSA=false;
+  S.sf=1.0;S.csf=1.0;S.pal=1.2;S.apal=1.2;S.hpal=1.2;S.pretEChoice=null;S.pretPChoice=null;S.hospEChoice=null;S.childProtMethod='nrv';S.picuPhase='acute';S.picuAcuteChoice='bmr';S.adultAgeGrp='under65';S.icuGuideline='both';S.aoutSA=false;S.icuRenal='none';
   document.querySelectorAll('#icu-guideline-tog .tog').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('#aout-sa-tog .tog').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('#icu-renal-tog .tog').forEach((b,i)=>b.classList.toggle('active',i===0));
   setEnergyUnit('kcal');
   setSF(1.0,true);setCSF(1.0,true);setChildProt('nrv');
   document.getElementById('child-prot-method-field').style.display='none';
