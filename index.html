@@ -2014,56 +2014,28 @@ function generateOutput(){
   }
 
   if(kcal>0&&prot>0&&['adult-out','adult-hosp'].includes(S.type)){
-    // USDA exchange values
-    const VEG_KCAL=25,FRUIT_KCAL=60,DAIRY_KCAL=120,FAT_KCAL=45;
-    const STARCH_KCAL=80,STARCH_CARB=15,STARCH_PROT=2;
-    const LEAN_KCAL=45,LEAN_PROT=7;
+    // Grains & oils from the USDA Healthy US-Style pattern by nearest calorie level
+    // [kcal level, grains oz-eq/day, oils g/day]
+    const USDA=[[1200,4,17],[1400,5,17],[1600,5,22],[1800,6,24],[2000,6,27],[2200,7,29],[2400,8,31],[2600,9,34],[2800,10,36],[3000,10,44],[3200,10,51]];
+    let near=USDA[0];USDA.forEach(r=>{if(Math.abs(r[0]-kcal)<Math.abs(near[0]-kcal))near=r;});
+    const grains=near[1],oilsG=near[2],oilTsp=Math.round(oilsG/5*10)/10;
+    // Maldives FBDG groups — veg (3–5) and fruit (2–3) scaled down at lower energy, never below the minimum; dairy fixed at 2
+    const veg=kcal<1800?3:kcal<2400?4:5;
+    const fruit=kcal<2200?2:3;
+    const dairy=2;
+    // Protein foods top up the requirement AFTER grains/dairy/veg contribute (grain 2g, dairy 8g, veg 1g per serve; 1 protein serve ≈ 17.5g)
+    const protOther=grains*2+dairy*8+veg*1;
+    const protFoods=Math.max(1,Math.round((prot-protOther)/17.5*2)/2);
+    const protDelivered=r0(protOther+protFoods*17.5);
 
-    // Fixed serves based on goals
-    const veg=5,fruit=2,dairy=2;
-    // Solve for fat last — start with 4 tsp as default
-    let fat=4;
-    const fixedKcal=veg*VEG_KCAL+fruit*FRUIT_KCAL+dairy*DAIRY_KCAL+fat*FAT_KCAL;
-    const fixedProt=veg*2+dairy*8;
-
-    // Remaining kcal and protein for starch + lean protein
-    let remKcal=kcal-fixedKcal;
-    const remProt=prot-fixedProt;
-
-    // Enforce minimum 2 FBDG protein serves = 5 USDA lean exchanges minimum
-    const MIN_LEAN=5;
-    // Solve starch serves from remaining kcal after guaranteeing min protein
-    // leanExch = max(MIN_LEAN, solve from protein equation)
-    // First try protein-driven: leanExch from protein need
-    let leanExch=Math.round(remProt/LEAN_PROT);
-    leanExch=Math.max(MIN_LEAN,leanExch);
-
-    // Starch serves from remaining kcal after protein
-    let starchServes=Math.round((remKcal-leanExch*LEAN_KCAL)/STARCH_KCAL);
-    starchServes=Math.max(3,Math.min(10,starchServes));
-
-    // Check total kcal and adjust fat to fill gap if needed
-    let totalKcal=starchServes*STARCH_KCAL+leanExch*LEAN_KCAL+veg*VEG_KCAL+fruit*FRUIT_KCAL+dairy*DAIRY_KCAL+fat*FAT_KCAL;
-    const kcalGap=kcal-totalKcal;
-    // Adjust fat serves to close gap (each tsp = 45 kcal)
-    if(Math.abs(kcalGap)>50){
-      const fatAdj=Math.round(kcalGap/FAT_KCAL);
-      fat=Math.max(2,Math.min(8,fat+fatAdj));
-      totalKcal=starchServes*STARCH_KCAL+leanExch*LEAN_KCAL+veg*VEG_KCAL+fruit*FRUIT_KCAL+dairy*DAIRY_KCAL+fat*FAT_KCAL;
-    }
-
-    // Convert lean USDA exchanges → Maldives FBDG protein serves (÷2.5, round to 0.5)
-    const fbdgProt=Math.round(leanExch/2.5*2)/2;
-
-    servesBlock=`\nRECOMMENDED DAILY SERVES — Food Based Dietary Guidelines for Maldivians\n`+
-    `Grains / cereals / starchy veg: ${starchServes} serves  (1 roshi, ½ cup rice, 1 slice bread, ½ cup potato/taro)\n`+
-    `Fish / meat / eggs / lentils:   ${fbdgProt} serves  (100g fish, 80g chicken, 2 eggs, 1 cup lentils/legumes)\n`+
-    `Vegetables:   ${veg} serves   (½ cup cooked / 1 cup raw)\n`+
-    `Fruit:  ${fruit} serves   (1 cup fresh / 1 medium)\n`+
-    `Milk / yoghurt /Cheese (reduced fat):   ${dairy} serves   (250ml milk / ¾ cup yoghurt)\n`+
-    `2 slices/ 40g cheese \n`+
-    `Oil:    ${fat} tsp\n`+
-    `Estimated total: ~${r0(totalKcal)} kcal`;
+    servesBlock=`\nRECOMMENDED DAILY SERVES — Maldives FBDG + USDA energy pattern (~${near[0]} kcal level)\n`+
+    `Grains / cereals / starchy veg: ${grains} serves  (1 roshi, ½ cup rice, 1 slice bread, ½ cup potato/taro)\n`+
+    `Fish / meat / eggs / lentils:   ${protFoods} serves  (100g fish, 80g chicken, 2 eggs, 1 cup lentils/legumes)\n`+
+    `Vegetables:   ${veg} serves   (½ cup cooked / 1 cup raw · FBDG 3–5)\n`+
+    `Fruit:  ${fruit} serves   (1 cup fresh / 1 medium · FBDG 2–3)\n`+
+    `Milk / yoghurt / cheese (reduced fat):   ${dairy} serves   (250ml milk / ¾ cup yoghurt / 40g cheese)\n`+
+    `Oil:    ${oilTsp} tsp  (~${oilsG}g)\n`+
+    `Protein from this plan: ~${protDelivered}g  (target ~${r0(prot)}g)`;
   }
 
   // Lean clinical-notes format for adult-hosp; rich format with Source for others
