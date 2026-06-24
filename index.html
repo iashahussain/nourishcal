@@ -803,7 +803,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
 <div class="card section" id="sec-adult-icu">
   <div class="ct">Adult ICU — NEMO / ESPEN / ASPEN</div>
   <div class="field"><label>ICU Phase</label><div class="tog-group" id="icu-phase-tog"><button class="tog active" onclick="setICUPhase('early')">Early phase (day 1–3)</button><button class="tog" onclick="setICUPhase('established')">Established critical illness</button></div></div>
-  <div class="field"><label>AKI modifier</label><select id="icu-aki" onchange="recalc()"><option value="none">No AKI</option><option value="no-rrt">AKI — no dialysis</option><option value="hd">AKI — intermittent HD</option><option value="crrt">AKI — CRRT</option></select></div>
+  <div class="field"><label>Renal status (AKI / CKD)</label><select id="icu-aki" onchange="recalc()"><option value="none">None</option><option value="no-krt">AKI / AKI-on-CKD / CKD — not on KRT</option><option value="int-krt">On intermittent KRT (HD)</option><option value="cont-krt">On continuous / prolonged KRT (CKRT/PIKRT)</option></select></div>
   <div class="field"><label>Guideline to follow</label><div class="tog-group" id="icu-guideline-tog"><button class="tog active" onclick="setICUGuideline('both')">Show both</button><button class="tog" onclick="setICUGuideline('espen')">ESPEN</button><button class="tog" onclick="setICUGuideline('aspen')">ASPEN</button></div></div>
   <div id="aicu-result"></div>
   <style>
@@ -858,7 +858,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
         <div>⚑ <strong>Measure with indirect calorimetry if you can.</strong> These weight-based numbers are estimates, and are least reliable in obesity (true needs can be roughly double the estimate).</div>
         <div><strong>ASPEN energy:</strong> 12–25 kcal/kg for the first 7–10 days (feeding on the lower side early is fine), then 25–30 kcal/kg afterwards. <strong>ESPEN:</strong> build up slowly — about 70% of target in week 1, then 80–100% from day 3.</div>
         <div><strong>Weights:</strong> ideal BW = weight at BMI 25 (25 × height²); adjusted BW = ideal BW + ¼ of the excess weight; IBW-Devine = 50 (men)/45.5 (women) kg + 2.3 kg for each inch above 5 ft.</div>
-        <div><strong>Kidney injury (AKI):</strong> energy stays the same — only protein changes. Pick the dialysis status in the AKI selector. Never cut protein just to delay starting dialysis.</div>
+        <div><strong>Kidney injury (AKI / CKD):</strong> energy is the same as any ICU patient — only protein changes with dialysis. Pick the renal status above (targets from the ESPEN renal guideline): not on KRT 1.0→1.3 · intermittent KRT 1.3–1.5 · continuous/prolonged KRT 1.5–1.7 (up to 2.0) g/kg. Never cut protein just to delay starting dialysis.</div>
         <div><strong>Obesity:</strong> feed cautiously — higher protein hasn't been shown to help, and obese patients often do better, so avoid overfeeding.</div>
       </div>
     </div>
@@ -1508,12 +1508,10 @@ function icuModel(){
   let renal=null;
   if(aki!=='none'){
     let lo,hi,lbl,extra='';
-    if(aki==='no-rrt'){lo=1.0;hi=1.0;lbl='AKI, no dialysis';}
-    else if(aki==='hd'){lo=1.0;hi=1.5;lbl='AKI on intermittent HD';}
-    else {lo=1.5;hi=1.7;lbl='AKI on CRRT';extra=' · up to 2.0–2.5 g/kg if prolonged CRRT / high losses';}
-    const pv=lo===hi?`${r1(lo*actual)} g/day`:`${r1(lo*actual)}–${r1(hi*actual)} g/day`;
-    const pk=lo===hi?`${lo} g/kg`:`${lo}–${hi} g/kg`;
-    renal={val:pv,det:`${pk} × ${actual}kg actual — ${lbl}${extra}`};
+    if(aki==='no-krt'){lo=1.0;hi=1.3;lbl='AKI / AKI-on-CKD / CKD, not on KRT';extra=' · start 1.0, increase to 1.3 if tolerated (also depends on the underlying illness)';}
+    else if(aki==='int-krt'){lo=1.3;hi=1.5;lbl='on intermittent KRT (HD)';}
+    else {lo=1.5;hi=1.7;lbl='on continuous / prolonged KRT (CKRT/PIKRT)';extra=' · 1.5–1.7 (higher end if hypercatabolic); up to 2.0 g/kg if prolonged with negative nitrogen balance';}
+    renal={val:`${r1(lo*actual)}–${r1(hi*actual)} g/day`,det:`${lo}–${hi} g/kg × ${actual}kg actual — ${lbl}${extra}`};
   }
   const obeseCaveat=obese?'⚑ Weight-based targets are unreliable in obesity (measured needs can be ~2× the estimate) — use indirect calorimetry where available. Hypocaloric high-protein rests on low-quality evidence; obese patients often survive better (obesity paradox) — avoid overfeeding.':'';
   const heightNote=!h?'Enter height to enable BMI / obese pathway.':'';
