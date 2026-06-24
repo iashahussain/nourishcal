@@ -772,7 +772,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
 <div class="card section" id="sec-adult-out">
   <div class="ct">Adult Outpatient — Schofield BMR × PAL</div>
   <div class="field"><label>Age (years)</label><input type="number" id="aout-age" placeholder="e.g. 35" min="18" max="100" oninput="recalc()"></div>
-  <div class="field"><label>PAL — NHMRC 2006</label><div class="pal-grid" id="apal-grid"><div class="pal-opt active" onclick="setAPAL(1.2,'Bed rest')"><div class="pv">1.2</div><div class="pd">Bed rest</div></div><div class="pal-opt" onclick="setAPAL(1.4,'Very sedentary')"><div class="pv">1.4</div><div class="pd">Very sedentary</div></div><div class="pal-opt" onclick="setAPAL(1.6,'Light activity')"><div class="pv">1.6</div><div class="pd">Light activity</div></div><div class="pal-opt" onclick="setAPAL(1.8,'Moderate activity')"><div class="pv">1.8</div><div class="pd">Moderate activity</div></div><div class="pal-opt" onclick="setAPAL(2.0,'Heavy activity')"><div class="pv">2.0</div><div class="pd">Heavy activity</div></div><div class="pal-opt" onclick="setAPAL(2.2,'Vigorous')"><div class="pv">2.2</div><div class="pd">Vigorous</div></div></div></div>
+  <div class="field"><label>PAL — NHMRC 2006</label><div class="pal-grid" id="apal-grid"><div class="pal-opt active" onclick="setAPAL(1.2,'Bed rest')"><div class="pv">1.2</div><div class="pd">Bed rest</div></div><div class="pal-opt" onclick="setAPAL(1.4,'Sedentary (ICMR/FAO)')"><div class="pv">1.4</div><div class="pd">Sedentary (ICMR/FAO)</div></div><div class="pal-opt" onclick="setAPAL(1.6,'Light activity')"><div class="pv">1.6</div><div class="pd">Light activity</div></div><div class="pal-opt" onclick="setAPAL(1.8,'Moderate activity')"><div class="pv">1.8</div><div class="pd">Moderate activity</div></div><div class="pal-opt" onclick="setAPAL(2.0,'Heavy activity')"><div class="pv">2.0</div><div class="pd">Heavy activity</div></div><div class="pal-opt" onclick="setAPAL(2.2,'Vigorous')"><div class="pv">2.2</div><div class="pd">Vigorous</div></div></div></div>
   <div class="field"><label>BMR adjustment</label><div class="tog-group" id="aout-sa-tog"><button class="tog active" onclick="setAoutSA(false)">Standard BMR</button><button class="tog" onclick="setAoutSA(true)">South Asian −10% (ICMR)</button></div></div>
   <div class="field">
     <label>Protein requirement</label>
@@ -2035,6 +2035,7 @@ function generateOutput(){
     `Fruit:  ${fruit} serves   (1 cup fresh / 1 medium · FBDG 2–3)\n`+
     `Milk / yoghurt / cheese (reduced fat):   ${dairy} serves   (250ml milk / ¾ cup yoghurt / 40g cheese)\n`+
     `Oil:    ${oilTsp} tsp  (~${oilsG}g)\n`+
+    `Energy from this plan: ~${near[0]} kcal  (target ~${r0(kcal)} kcal)\n`+
     `Protein from this plan: ~${protDelivered}g  (target ~${r0(prot)}g)`;
   }
 
