@@ -822,26 +822,43 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
   #sec-adult-icu .icu-ref table{width:100%;border-collapse:collapse;margin-bottom:.6rem}
   #sec-adult-icu .icu-ref th,#sec-adult-icu .icu-ref td{border:1px solid var(--border);padding:.35rem .45rem;text-align:left;vertical-align:top}
   #sec-adult-icu .icu-ref th{background:var(--accent);color:#fff;font-size:.65rem;font-weight:600}
-  #sec-adult-icu .icu-ref-notes>div{margin-bottom:.3rem;color:var(--muted)}
+  #sec-adult-icu .icu-ref-notes>div{margin-bottom:.35rem;color:var(--muted)}
+  #sec-adult-icu .icu-ref td.bmi{font-weight:700;text-align:center;background:var(--accent-light);white-space:nowrap;line-height:1.3}
+  #sec-adult-icu .icu-ref .g{display:inline-block;font-weight:700;font-size:.58rem;letter-spacing:.04em;padding:.08rem .3rem;border-radius:4px}
+  #sec-adult-icu .icu-ref .g-espen{background:#e0f2f1;color:#00695c}
+  #sec-adult-icu .icu-ref .g-aspen{background:#ede7f6;color:#4527a0}
+  #sec-adult-icu .icu-ref .wt{color:var(--dim)}
+  #sec-adult-icu .icu-ref-notes{border-top:1px solid var(--border);padding-top:.5rem}
   </style>
   <details class="icu-ref">
     <summary>Quick reference — ICU energy &amp; protein (ESPEN vs ASPEN)</summary>
     <div class="icu-ref-body">
+      <div style="font-size:.66rem;color:var(--muted);margin-bottom:.45rem">Targets when indirect calorimetry isn't available. Weight = <strong>actual body weight</strong> unless a different basis is noted in grey.</div>
       <table>
-        <thead><tr><th>BMI</th><th>ESPEN — energy · protein · weight</th><th>ASPEN — energy · protein · weight</th></tr></thead>
+        <thead><tr><th>BMI (kg/m²)</th><th>Guideline</th><th>Energy</th><th>Protein</th></tr></thead>
         <tbody>
-          <tr><td>&lt;25</td><td>25 kcal/kg · 1.3 g/kg · <strong>actual</strong></td><td>12–25 kcal/kg · 1.2–2.0 g/kg · <strong>actual</strong></td></tr>
-          <tr><td>25–30</td><td>20–25 kcal/kg × <strong>ideal BW</strong> · 1.3 g/kg × <strong>adj BW*</strong></td><td>12–25 kcal/kg · 1.2–2.0 g/kg · <strong>actual</strong></td></tr>
-          <tr><td>30–50</td><td>20–25 kcal/kg × <strong>ideal BW</strong> · 1.3 g/kg × <strong>adj BW*</strong></td><td>11–14 kcal/kg <strong>actual</strong> · ≥2.0 (30–40) / 2.0–2.5 (≥40) g/kg · <strong>IBW (Devine)</strong></td></tr>
-          <tr><td>&gt;50</td><td>20–25 kcal/kg × <strong>ideal BW</strong> · 1.3 g/kg × <strong>adj BW*</strong></td><td>22–25 kcal/kg · 2.0–2.5 g/kg · <strong>IBW (Devine)</strong></td></tr>
+          <tr><td class="bmi" rowspan="2">&lt;25<br><span class="wt">normal</span></td>
+              <td><span class="g g-espen">ESPEN</span></td><td>25 kcal/kg</td><td>1.3 g/kg</td></tr>
+          <tr><td><span class="g g-aspen">ASPEN</span></td><td>12–25 kcal/kg <span class="wt">(first 7–10 d · 2022)</span><br>then 25–30 kcal/kg <span class="wt">(after · 2016)</span></td><td>1.2–2.0 g/kg</td></tr>
+
+          <tr><td class="bmi" rowspan="2">25–30<br><span class="wt">overweight</span></td>
+              <td><span class="g g-espen">ESPEN</span></td><td>20–25 kcal/kg <span class="wt">× ideal BW</span></td><td>1.3 g/kg <span class="wt">× adj BW</span></td></tr>
+          <tr><td><span class="g g-aspen">ASPEN</span></td><td>12–25 kcal/kg <span class="wt">(first 7–10 d · 2022)</span><br>then 25–30 kcal/kg <span class="wt">(after · 2016)</span></td><td>1.2–2.0 g/kg</td></tr>
+
+          <tr><td class="bmi" rowspan="2">30–50<br><span class="wt">obese</span></td>
+              <td><span class="g g-espen">ESPEN</span></td><td>20–25 kcal/kg <span class="wt">× ideal BW</span></td><td>1.3 g/kg <span class="wt">× adj BW</span></td></tr>
+          <tr><td><span class="g g-aspen">ASPEN</span></td><td>11–14 kcal/kg <span class="wt">× actual</span></td><td>≥2.0 g/kg (BMI 30–40)<br>2.0–2.5 g/kg (BMI ≥40) <span class="wt">× IBW-Devine</span></td></tr>
+
+          <tr><td class="bmi" rowspan="2">&gt;50</td>
+              <td><span class="g g-espen">ESPEN</span></td><td>20–25 kcal/kg <span class="wt">× ideal BW</span></td><td>1.3 g/kg <span class="wt">× adj BW</span></td></tr>
+          <tr><td><span class="g g-aspen">ASPEN</span></td><td>22–25 kcal/kg <span class="wt">× IBW-Devine</span></td><td>2.0–2.5 g/kg <span class="wt">× IBW-Devine</span></td></tr>
         </tbody>
       </table>
       <div class="icu-ref-notes">
-        <div>Early phase (ESPEN): hypocaloric <strong>&lt;70%</strong> of target in week 1, ramp to 80–100% after day 3.</div>
-        <div>Above BMI 25 ESPEN corrects the reference weight: energy on <strong>ideal BW</strong> (BMI 25 = 25 × height²), protein on <strong>*adjusted BW</strong> = ideal BW + 0.25 × (actual − ideal BW).</div>
-        <div>⚑ <strong>Indirect calorimetry is the gold standard</strong> — weight-based targets are unreliable in obesity (measured needs can be ~2× the estimate; Schetz 2019, Intensive Care Med).</div>
-        <div>Hypocaloric high-protein evidence is low-quality (small/old RCTs). Obesity paradox: obese patients often survive better — avoid overfeeding.</div>
-        <div>No IBW formula is validated; ESPEN uses BMI-25-based adjusted weight, ASPEN's evidence base uses formula IBW (Devine here). AKI/CRRT: ESPEN ≤1.7, ASPEN up to 2.0–2.5 g/kg — weigh EFFORT-Protein (2023) caution.</div>
+        <div>⚑ <strong>Indirect calorimetry is the gold standard.</strong> These weight-based targets are a fallback and are unreliable in obesity — measured needs can be ~2× the estimate (Schetz 2019).</div>
+        <div><strong>ASPEN energy:</strong> 12–25 kcal/kg is permissive for the first 7–10 days (2022 — no benefit from higher); aim 25–30 kcal/kg thereafter (2016). <strong>ESPEN early phase:</strong> hypocaloric ~70% of target in week 1, then 80–100% after day 3.</div>
+        <div><strong>Weights:</strong> ideal BW = weight at BMI 25 (25 × height²); adj BW = ideal BW + 0.25 × (actual − ideal BW); IBW-Devine = 50 (M)/45.5 (F) kg + 2.3 kg per inch over 5 ft.</div>
+        <div>Obese-protein evidence is low-quality and obese patients often survive better (obesity paradox) — avoid overfeeding. AKI/CRRT: ESPEN ≤1.7, ASPEN up to 2.0–2.5 g/kg (weigh EFFORT-Protein 2023).</div>
       </div>
     </div>
   </details>
@@ -1482,7 +1499,7 @@ function icuModel(){
   let aspEnergy;
   if(obese&&bmi<=50)aspEnergy={val:`${toE(r0(11*actual))}–${toE(r0(14*actual))} ${u}/day`,det:`obese BMI ${r1(bmi)}: 11–14 kcal/kg × ${actual}kg actual`};
   else if(obese&&bmi>50)aspEnergy=ibwD?{val:`${toE(r0(22*ibwD))}–${toE(r0(25*ibwD))} ${u}/day`,det:`obese BMI ${r1(bmi)}: 22–25 kcal/kg × ${ibwD}kg IBW-Devine`}:{val:'—',det:'select sex to compute IBW-Devine'};
-  else aspEnergy={val:`${toE(r0(12*actual))}–${toE(r0(25*actual))} ${u}/day`,det:`12–25 kcal/kg × ${actual}kg actual, first 7–10 days`};
+  else aspEnergy={val:`${toE(r0(12*actual))}–${toE(r0(25*actual))} ${u}/day`,det:`12–25 kcal/kg first 7–10 days (ASPEN 2022, permissive); then ~${toE(r0(25*actual))}–${toE(r0(30*actual))} ${u}/day (25–30 kcal/kg) thereafter (ASPEN 2016) · × ${actual}kg actual`};
   let aspProt;
   if(obese)aspProt=ibwD?(bmi>=40?{val:`${r1(2.0*ibwD)}–${r1(2.5*ibwD)} g/day`,det:`obese BMI ${r1(bmi)}: 2.0–2.5 g/kg × ${ibwD}kg IBW-Devine`}:{val:`≥${r1(2.0*ibwD)} g/day`,det:`obese BMI ${r1(bmi)}: ≥2.0 g/kg × ${ibwD}kg IBW-Devine`}):{val:'—',det:'select sex to compute IBW-Devine'};
   else aspProt={val:`${r1(1.2*actual)}–${r1(2.0*actual)} g/day`,det:`1.2–2.0 g/kg × ${actual}kg actual`};
