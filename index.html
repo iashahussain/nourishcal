@@ -803,7 +803,7 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
 <div class="card section" id="sec-adult-icu">
   <div class="ct">Adult ICU — NEMO / ESPEN / ASPEN</div>
   <div class="field"><label>ICU Phase</label><div class="tog-group" id="icu-phase-tog"><button class="tog active" onclick="setICUPhase('early')">Early phase (day 1–3)</button><button class="tog" onclick="setICUPhase('established')">Established critical illness</button></div></div>
-  <div class="field"><label>AKI modifier</label><select id="icu-aki" onchange="recalc()"><option value="none">No AKI</option><option value="no-dialysis">AKI — no dialysis</option><option value="dialysis">AKI — on dialysis</option></select></div>
+  <div class="field"><label>AKI modifier</label><select id="icu-aki" onchange="recalc()"><option value="none">No AKI</option><option value="no-rrt">AKI — no dialysis</option><option value="hd">AKI — intermittent HD</option><option value="crrt">AKI — CRRT</option></select></div>
   <div class="field"><label>Guideline to follow</label><div class="tog-group" id="icu-guideline-tog"><button class="tog active" onclick="setICUGuideline('both')">Show both</button><button class="tog" onclick="setICUGuideline('espen')">ESPEN</button><button class="tog" onclick="setICUGuideline('aspen')">ASPEN</button></div></div>
   <div id="aicu-result"></div>
   <style>
@@ -855,10 +855,11 @@ input.has-error,select.has-error{border-color:var(--danger);background:#fff5f5;b
         </tbody>
       </table>
       <div class="icu-ref-notes">
-        <div>⚑ <strong>Indirect calorimetry is the gold standard.</strong> These weight-based targets are a fallback and are unreliable in obesity — measured needs can be ~2× the estimate (Schetz 2019).</div>
-        <div><strong>ASPEN energy:</strong> 12–25 kcal/kg is permissive for the first 7–10 days (2022 — no benefit from higher); aim 25–30 kcal/kg thereafter (2016). <strong>ESPEN early phase:</strong> hypocaloric ~70% of target in week 1, then 80–100% after day 3.</div>
-        <div><strong>Weights:</strong> ideal BW = weight at BMI 25 (25 × height²); adj BW = ideal BW + 0.25 × (actual − ideal BW); IBW-Devine = 50 (M)/45.5 (F) kg + 2.3 kg per inch over 5 ft.</div>
-        <div>Obese-protein evidence is low-quality and obese patients often survive better (obesity paradox) — avoid overfeeding. AKI/CRRT: ESPEN ≤1.7, ASPEN up to 2.0–2.5 g/kg (weigh EFFORT-Protein 2023).</div>
+        <div>⚑ <strong>Measure with indirect calorimetry if you can.</strong> These weight-based numbers are estimates, and are least reliable in obesity (true needs can be roughly double the estimate).</div>
+        <div><strong>ASPEN energy:</strong> 12–25 kcal/kg for the first 7–10 days (feeding on the lower side early is fine), then 25–30 kcal/kg afterwards. <strong>ESPEN:</strong> build up slowly — about 70% of target in week 1, then 80–100% from day 3.</div>
+        <div><strong>Weights:</strong> ideal BW = weight at BMI 25 (25 × height²); adjusted BW = ideal BW + ¼ of the excess weight; IBW-Devine = 50 (men)/45.5 (women) kg + 2.3 kg for each inch above 5 ft.</div>
+        <div><strong>Kidney injury (AKI):</strong> energy stays the same — only protein changes. Pick the dialysis status in the AKI selector. Never cut protein just to delay starting dialysis.</div>
+        <div><strong>Obesity:</strong> feed cautiously — higher protein hasn't been shown to help, and obese patients often do better, so avoid overfeeding.</div>
       </div>
     </div>
   </details>
@@ -1503,13 +1504,21 @@ function icuModel(){
   let aspProt;
   if(obese)aspProt=ibwD?(bmi>=40?{val:`${r1(2.0*ibwD)}–${r1(2.5*ibwD)} g/day`,det:`obese BMI ${r1(bmi)}: 2.0–2.5 g/kg × ${ibwD}kg IBW-Devine`}:{val:`≥${r1(2.0*ibwD)} g/day`,det:`obese BMI ${r1(bmi)}: ≥2.0 g/kg × ${ibwD}kg IBW-Devine`}):{val:'—',det:'select sex to compute IBW-Devine'};
   else aspProt={val:`${r1(1.2*actual)}–${r1(2.0*actual)} g/day`,det:`1.2–2.0 g/kg × ${actual}kg actual`};
-  let akiNote='';
-  if(aki==='no-dialysis')akiNote='AKI (no RRT): if non-catabolic, consider lower protein ~1.0 g/kg; do not restrict if catabolic.';
-  else if(aki==='dialysis')akiNote='On RRT/CRRT: amino-acid losses raise needs — ESPEN up to ~1.7 g/kg, ASPEN up to 2.0–2.5 g/kg; weigh against EFFORT-Protein (2023) caution in AKI.';
+  // AKI / renal — ESPEN renal guideline 2021. Protein on actual body weight; energy unchanged by AKI.
+  let renal=null;
+  if(aki!=='none'){
+    let lo,hi,lbl,extra='';
+    if(aki==='no-rrt'){lo=1.0;hi=1.0;lbl='AKI, no dialysis';}
+    else if(aki==='hd'){lo=1.0;hi=1.5;lbl='AKI on intermittent HD';}
+    else {lo=1.5;hi=1.7;lbl='AKI on CRRT';extra=' · up to 2.0–2.5 g/kg if prolonged CRRT / high losses';}
+    const pv=lo===hi?`${r1(lo*actual)} g/day`:`${r1(lo*actual)}–${r1(hi*actual)} g/day`;
+    const pk=lo===hi?`${lo} g/kg`:`${lo}–${hi} g/kg`;
+    renal={val:pv,det:`${pk} × ${actual}kg actual — ${lbl}${extra}`};
+  }
   const obeseCaveat=obese?'⚑ Weight-based targets are unreliable in obesity (measured needs can be ~2× the estimate) — use indirect calorimetry where available. Hypocaloric high-protein rests on low-quality evidence; obese patients often survive better (obesity paradox) — avoid overfeeding.':'';
   const heightNote=!h?'Enter height to enable BMI / obese pathway.':'';
   const shortFlag=(h&&h<152&&obese)?`⚠ Height ${h}cm: Devine IBW is unreliable below ~152cm — verify clinically.`:'';
-  return {actual,h,sex,bmi,ibw25,ibwD,adjBW,obese,espCorrect,espEnWtLbl,espPrWtLbl,phase,aki,espEnergy,espProt,aspEnergy,aspProt,akiNote,obeseCaveat,heightNote,shortFlag};
+  return {actual,h,sex,bmi,ibw25,ibwD,adjBW,obese,espCorrect,espEnWtLbl,espPrWtLbl,phase,aki,espEnergy,espProt,aspEnergy,aspProt,renal,obeseCaveat,heightNote,shortFlag};
 }
 function calcAdultICU(){
   const el=document.getElementById('aicu-result');
@@ -1520,11 +1529,14 @@ function calcAdultICU(){
     <div style="color:var(--accent);font-weight:600">Energy</div>
     <div class="icu-line" style="${dim('espen')}"><span class="src-tag">ESPEN 2023</span><div class="icu-fig"><span class="icu-val">${m.espEnergy.val}</span><span class="icu-det">${m.espEnergy.det}</span></div></div>
     <div class="icu-line" style="${dim('aspen')}"><span class="src-tag">ASPEN 2022</span><div class="icu-fig"><span class="icu-val">${m.aspEnergy.val}</span><span class="icu-det">${m.aspEnergy.det}</span></div></div>
-    <div style="color:var(--accent);font-weight:600;margin-top:.55rem">Protein</div>
+    ${m.renal
+      ? `<div style="color:var(--accent);font-weight:600;margin-top:.55rem">Protein — kidney-adjusted</div>
+    <div class="icu-line"><span class="src-tag">ESPEN renal</span><div class="icu-fig"><span class="icu-val">${m.renal.val}</span><span class="icu-det">${m.renal.det}</span></div></div>
+    <div class="fl" style="color:var(--dim)">Don't reduce protein just to avoid/delay dialysis. Energy target is unchanged by AKI.</div>`
+      : `<div style="color:var(--accent);font-weight:600;margin-top:.55rem">Protein</div>
     <div class="icu-line" style="${dim('espen')}"><span class="src-tag">ESPEN 2023</span><div class="icu-fig"><span class="icu-val">${m.espProt.val}</span><span class="icu-det">${m.espProt.det}</span></div></div>
-    <div class="icu-line" style="${dim('aspen')}"><span class="src-tag">ASPEN 2022</span><div class="icu-fig"><span class="icu-val">${m.aspProt.val}</span><span class="icu-det">${m.aspProt.det}</span></div></div>
+    <div class="icu-line" style="${dim('aspen')}"><span class="src-tag">ASPEN 2022</span><div class="icu-fig"><span class="icu-val">${m.aspProt.val}</span><span class="icu-det">${m.aspProt.det}</span></div></div>`}
     ${m.obeseCaveat?`<div class="fl" style="color:var(--warn)">${m.obeseCaveat}</div>`:''}
-    ${m.akiNote?`<div class="fl" style="color:var(--warn)">AKI: ${m.akiNote}</div>`:''}
     ${m.heightNote?`<div class="fl" style="color:var(--dim)">${m.heightNote}</div>`:''}
     ${m.shortFlag?`<div class="fl" style="color:var(--warn)">${m.shortFlag}</div>`:''}
     <div class="fsrc">Following: ${fol==='espen'?'ESPEN 2023':fol==='aspen'?'ASPEN 2022':'both shown'} · NEMO | ESPEN ICU 2019 (rev 2023) | ASPEN 2022 | obesity SCCM/ASPEN 2016</div>
@@ -1794,7 +1806,9 @@ function generateOutput(){
     const fol=S.icuGuideline;
     const followLabel=fol==='espen'?'ESPEN 2023 (European)':fol==='aspen'?'ASPEN 2022 (American)':'both shown — select per unit protocol';
     energyLine=`ENERGY — ICU (indirect calorimetry preferred where available)\n   Following: ${followLabel}\n   • ESPEN 2023:  ${icuFmt(m.espEnergy)}\n   • ASPEN 2022:  ${icuFmt(m.aspEnergy)}`;
-    protLine=`PROTEIN — ICU\n   • ESPEN 2023:  ${icuFmt(m.espProt)}\n   • ASPEN 2022:  ${icuFmt(m.aspProt)}`+(m.obeseCaveat?`\n   ${m.obeseCaveat}`:'')+(m.akiNote?`\n   AKI: ${m.akiNote}`:'')+(m.heightNote?`\n   ${m.heightNote}`:'')+(m.shortFlag?`\n   ${m.shortFlag}`:'');
+    protLine=(m.renal
+      ? `PROTEIN — ICU (kidney-adjusted · ESPEN renal)\n   • ${icuFmt(m.renal)}\n   Don't reduce protein to avoid/delay dialysis; energy is unchanged by AKI.`
+      : `PROTEIN — ICU\n   • ESPEN 2023:  ${icuFmt(m.espProt)}\n   • ASPEN 2022:  ${icuFmt(m.aspProt)}`)+(m.obeseCaveat?`\n   ${m.obeseCaveat}`:'')+(m.heightNote?`\n   ${m.heightNote}`:'')+(m.shortFlag?`\n   ${m.shortFlag}`:'');
     src='NEMO Nutrition Support Group | ESPEN ICU 2019 (rev. 2023) | ASPEN 2022 (Compher) | obesity: SCCM/ASPEN 2016';
   } else if(S.type==='picu'){
     const phase=S.picuPhase;
